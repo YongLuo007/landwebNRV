@@ -1,22 +1,15 @@
 ################################################################################
-#' this function is to classify ecoregion in to study region 
-#' based on ecoregion map and study area map
+#' this function is to classify plot into ecoregion in study region 
 #' 
-#' @param studyAreaMap  Character string. The name of study area map.
+#' 
+#' @param plotLocation  data.table. It must have three columns: PlotID, longitude and latitude.
 #'
-#' @param studyAreaMapPath  Character string. The path direct to the study area map.
-#'        Default is the current working directory.
 #' 
-#' @param ecoregionMap,  Character string. The name of ecoregion map.
+#' @param studyAreaEcoregionMap,  RasterLayer. It has ecoregion information in the study area.
 #'        
 #' 
-#' @param ecoregionMapPath  Character string. The path direct to the ecoregion map.
-#'        Default is the current working directory.
 #' 
-#' @param cellSize  Numeric. Determine the cell size for the generated map
-#'        Default is 200 meters
-#'
-#' @return 
+#' @return a data table object. It has the PlotID for each ecoregion in the study area. 
 #'
 #' @note no note
 #'
@@ -33,21 +26,26 @@
 #' \dontrun{
 #' 
 #' }
-setGeneric("plotsByEcoregion", function(plotLocation, studyAreaMapPath,
-                                        ecoregionMap, ecoregionMapPath,
-                                        cellSize) {
-  standardGeneric("ecoregionClassification")
+setGeneric("plotsByEcoregion", function(plotLocation, 
+                                        studyAreaEcoregionMap) {
+  standardGeneric("plotsByEcoregion")
 })
-
 setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "character",
-                ecoregionMap = "character", ecoregionMapPath = "character",
-                cellSize = "numeric"),
-  definition = function(studyAreaMap, studyAreaMapPath,
-                        ecoregionMap, ecoregionMapPath,
-                        cellSize) {
-    
+  "plotsByEcoregion",
+  signature = c(plotLocation = "data.table", studyAreaEcoregionMap = "RasterLayer"),
+  definition = function(plotLocation, studyAreaEcoregionMap) {
+    coordinates(plotLocation) <- c("longitude", "latitude")
+    proj4string(plotLocation) <- proj4string(studyAreaEcoregionMap)
+    plotInStudyArea <- raster::crop(plotLocation, extent(studyAreaEcoregionMap))
+    r <- raster(ncol=ncol(studyAreaEcoregionMap),
+                nrow=nrow(studyAreaEcoregionMap))# based on south size )
+    extent(r) <- extent(studyAreaEcoregionMap)
+    crs(r) <- crs(studyAreaEcoregionMap)
+    plotInStudyArea <- rasterize(plotInStudyArea, r, "PlotID")
+    plotNumberEcoregionTable <- data.table(PlotID = getValues(plotInStudyArea),
+                                           Ecoregion = getValues(studyAreaEcoregionMap))
+    plotNumberEcoregionTable <- plotNumberEcoregionTable[!is.na(PlotID) & !is.na(Ecoregion),]
+    return(plotNumberEcoregionTable)
   })
 
 

@@ -2,21 +2,17 @@
 #' this function is to classify ecoregion in to study region 
 #' based on ecoregion map and study area map
 #' 
-#' @param studyAreaMap  Character string. The name of study area map.
+#' @param studyAreaMap  SpatialPolygons. This is study area map.
 #'
-#' @param studyAreaMapPath  Character string. The path direct to the study area map.
-#'        Default is the current working directory.
 #' 
-#' @param ecoregionMap,  Character string. The name of ecoregion map.
+#' @param ecoregionMap,  SpatialPolygonsDataFrame. It contains ecoregion information.
 #'        
-#' 
-#' @param ecoregionMapPath  Character string. The path direct to the ecoregion map.
-#'        Default is the current working directory.
 #' 
 #' @param cellSize  Numeric. Determine the cell size for the generated map
 #'        Default is 200 meters
 #'
-#' @return 
+#' @return Two objects: studyareaecoregion is RasterLayer 
+#'                      and attributesTable is data table
 #'
 #' @note no note
 #'
@@ -33,27 +29,22 @@
 #' \dontrun{
 #' 
 #' }
-setGeneric("ecoregionClassification", function(studyAreaMap, studyAreaMapPath,
-                                               ecoregionMap, ecoregionMapPath,
-                                               cellSize) {
+setGeneric("ecoregionClassification", function(studyAreaMap, ecoregionMap, cellSize) {
   standardGeneric("ecoregionClassification")
 })
 
 #' @export
-#' @rdname moduleCoverage
+#' @rdname ecoregionClassification
 setMethod(
   "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "character",
-                ecoregionMap = "character", ecoregionMapPath = "character",
+  signature = c(studyAreaMap = "SpatialPolygons", 
+                ecoregionMap = "SpatialPolygonsDataFrame",
                 cellSize = "numeric"),
-  definition = function(studyAreaMap, studyAreaMapPath,
-                        ecoregionMap, ecoregionMapPath,
+  definition = function(studyAreaMap, 
+                        ecoregionMap,
                         cellSize) {
-    studyarea <- readRDS(file.path(studyAreaMapPath, studyAreaMap)) 
-    ecoregionMap <- rgdal::readOGR(file.path(ecoregionMapPath, ecoregionMap),
-                                   layer = "ecozones")
-    studyarea <- spTransform(studyarea, crs(ecoregionMap))
-    studyareaecoregion <- crop(ecoregionMap, extent(studyarea))
+    studyAreaMap <- sp::spTransform(studyAreaMap, crs(ecoregionMap))
+    studyareaecoregion <- raster::crop(ecoregionMap, extent(studyAreaMap))
     r <- raster(ncol=round(1000*earthDist(long1=extent(studyareaecoregion)[1],
                                           lat1=extent(studyareaecoregion)[3],
                                           long2=extent(studyareaecoregion)[1],
@@ -64,105 +55,27 @@ setMethod(
                                           lat2=extent(studyareaecoregion)[3]))/cellSize)# based on south size )
     extent(r) <- extent(studyareaecoregion)
     crs(r) <- crs(studyareaecoregion)
-    studyarea1 <- rasterize(studyarea, r, 1)
+    studyarea1 <- rasterize(studyAreaMap, r, 1)
     studyareaecoregion <- rasterize(studyareaecoregion, r, "ECOZONE")
-    studyareaecoregion <- mask(studyareaecoregion, studyarea)
-    return(studyareaecoregion)
+    studyareaecoregion <- raster::mask(studyareaecoregion, studyAreaMap)
+    attributesTable <- data.table::data.table(ecoregionMap@data)
+    attributesTable <- attributesTable[ECOZONE %in% unique(getValues(studyareaecoregion)),]
+    return(list(studyareaecoregion = studyareaecoregion,
+                attributesTable = attributesTable))
   })
 
 #' @export
 #' @rdname ecoregionClassification
 setMethod(
   "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "missing",
-                ecoregionMap = "character", ecoregionMapPath = "character",
-                cellSize = "numeric"),
-  definition = function(studyAreaMap, ecoregionMap,
-                        ecoregionMapPath, cellSize) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = ".",
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ecoregionMapPath,
-                            cellSize = cellSize)
-  })    
-
-#' @export
-#' @rdname ecoregionClassification
-setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "character",
-                ecoregionMap = "character", ecoregionMapPath = "missing",
-                cellSize = "numeric"),
-  definition = function(studyAreaMap, studyAreaMapPath,
-                        ecoregionMap, cellSize) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = studyAreaMapPath,
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ".",
-                            cellSize = cellSize)
-  })   
-
-#' @export
-#' @rdname ecoregionClassification
-setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "character",
-                ecoregionMap = "character", ecoregionMapPath = "character",
-                cellSize = "missing"),
-  definition = function(studyAreaMap, studyAreaMapPath,
-                        ecoregionMap, ecoregionMapPath) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = studyAreaMapPath,
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ecoregionMapPath,
-                            cellSize = 200)
-  }) 
-
-#' @export
-#' @rdname ecoregionClassification
-setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "missing",
-                ecoregionMap = "character", ecoregionMapPath = "missing",
-                cellSize = "numeric"),
-  definition = function(studyAreaMap, ecoregionMap, cellSize) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = ".",
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ".",
-                            cellSize = cellSize)
-  }) 
-
-#' @export
-#' @rdname ecoregionClassification
-setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "missing",
-                ecoregionMap = "character", ecoregionMapPath = "character",
-                cellSize = "missing"),
-  definition = function(studyAreaMap, ecoregionMap, ecoregionMapPath) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = ".",
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ecoregionMapPath,
-                            cellSize = 200)
-  }) 
-
-#' @export
-#' @rdname ecoregionClassification
-setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "character",
-                ecoregionMap = "character", ecoregionMapPath = "missing",
-                cellSize = "missing"),
-  definition = function(studyAreaMap, studyAreaMapPath, ecoregionMap) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = studyAreaMapPath,
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ".",
-                            cellSize = 200)
-  }) 
-
-#' @export
-#' @rdname ecoregionClassification
-setMethod(
-  "ecoregionClassification",
-  signature = c(studyAreaMap = "character", studyAreaMapPath = "missing",
-                ecoregionMap = "character", ecoregionMapPath = "missing",
+  signature = c(studyAreaMap = "SpatialPolygons",
+                ecoregionMap = "SpatialPolygonsDataFrame",
                 cellSize = "missing"),
   definition = function(studyAreaMap, ecoregionMap) {
-    ecoregionClassification(studyAreaMap = studyAreaMap, studyAreaMapPath = ".",
-                            ecoregionMap = ecoregionMap, ecoregionMapPath = ".",
+    ecoregionClassification(studyAreaMap = studyAreaMap, 
+                            ecoregionMap = ecoregionMap, 
                             cellSize = 200)
-  }) 
+  })    
 
 # classify ecoregion based ecoregion map in the study region
 
