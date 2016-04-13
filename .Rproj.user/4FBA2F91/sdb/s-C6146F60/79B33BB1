@@ -1,0 +1,17 @@
+{
+    "contents" : "# classify ecoregion based ecoregion map in the study region\n\n# cellSize in meter\necoregionClassification <- function(studyAreaMap, studyAreaMapPath = \".\",\n                                    ecoregionMap, ecoregionMapPath = \".\",\n                                    cellSize = 200){\n  studyarea <- readRDS(file.path(studyAreaMapPath, studyAreaMap)) \n  ecoregionMap <- readOGR(file.path(ecoregionMapPath, ecoregionMap),\n                          layer = \"ecozones\")\n  studyarea <- spTransform(studyarea, crs(ecoregionMap))\n  studyareaecoregion <- crop(ecoregionMap, extent(studyarea))\n  r <- raster(ncol=round(1000*earthDist(long1=extent(studyareaecoregion)[1],\n                                     lat1=extent(studyareaecoregion)[3],\n                                     long2=extent(studyareaecoregion)[1],\n                                     lat2=extent(studyareaecoregion)[4]))/cellSize,\n              nrow=round(1000*earthDist(long1=extent(studyareaecoregion)[1],\n                                     lat1=extent(studyareaecoregion)[3],\n                                     long2=extent(studyareaecoregion)[2],\n                                     lat2=extent(studyareaecoregion)[3]))/cellSize)# based on south size )\n  extent(r) <- extent(studyareaecoregion)\n  crs(r) <- crs(studyareaecoregion)\n  studyarea1 <- rasterize(studyarea, r, 1)\n  studyareaecoregion <- rasterize(studyareaecoregion, r, \"ECOZONE\")\n  studyareaecoregion <- mask(studyareaecoregion, studyarea)\n  return(studyareaecoregion)\n}\nearthDist <- function (long1, lat1, long2, lat2)\n{\n  rad <- pi/180\n  a1 <- lat1 * rad\n  a2 <- long1 * rad\n  b1 <- lat2 * rad\n  b2 <- long2 * rad\n  dlon <- b2 - a2\n  dlat <- b1 - a1\n  a <- (sin(dlat/2))^2 + cos(a1) * cos(b1) * (sin(dlon/2))^2\n  c <- 2 * atan2(sqrt(a), sqrt(1 - a))\n  R <- 6378.145\n  d <- R * c\n  return(d)\n}\n\n\n\n\n\n\n\n\n",
+    "created" : 1460490961906.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2285951182",
+    "id" : "79B33BB1",
+    "lastKnownWriteTime" : 1460507613,
+    "path" : "~/GitHub/landwebNRV/ToolBox/ecoregionClassification.R",
+    "project_path" : "ToolBox/ecoregionClassification.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

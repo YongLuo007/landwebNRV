@@ -1,0 +1,17 @@
+{
+    "contents" : "rm(list=ls())\nstudyAreaMap <- \"landwebSimplePoly.rds\"\n\nstudyAreaMapPath = \"C:/Users/yonluo/Documents/LandWeb\"\necoregionMap <- \"ecozones.shp\"\necoregionMapPath <- \"M:/data/Ecozones\"\n\nsource('~/GitHub/landwebNRV/ToolBox/ecoregionClassification.R')\ndd <- ecoregionClassification(studyAreaMap, studyAreaMapPath, ecoregionMap, ecoregionMapPath)\n",
+    "created" : 1460507097648.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1784360760",
+    "id" : "B2DFD638",
+    "lastKnownWriteTime" : 30962664057077807,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
