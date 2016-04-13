@@ -1,0 +1,17 @@
+{
+    "contents" : "################################################################################\n#' this function is to classify ecoregion in to study region \n#' based on ecoregion map and study area map\n#' \n#' @param studyAreaMap  Character string. The name of study area map.\n#'\n#' @param studyAreaMapPath  Character string. The path direct to the study area map.\n#'        Default is the current working directory.\n#' \n#' @param ecoregionMap,  Character string. The name of ecoregion map.\n#'        \n#' \n#' @param ecoregionMapPath  Character string. The path direct to the ecoregion map.\n#'        Default is the current working directory.\n#' \n#' @param cellSize  Numeric. Determine the cell size for the generated map\n#'        Default is 200 meters\n#'\n#' @return \n#'\n#' @note no note\n#'\n#' @seealso no\n#'\n#' @include \n#' @export\n#' @docType methods\n#' @rdname plotsByEcoregion\n#'\n#' @author Yong Luo\n#'\n#' @examples\n#' \\dontrun{\n#' \n#' }\nsetGeneric(\"plotsByEcoregion\", function(plotLocation, studyAreaMapPath,\n                                        ecoregionMap, ecoregionMapPath,\n                                        cellSize) {\n  standardGeneric(\"ecoregionClassification\")\n})\n\nsetMethod(\n  \"ecoregionClassification\",\n  signature = c(studyAreaMap = \"character\", studyAreaMapPath = \"character\",\n                ecoregionMap = \"character\", ecoregionMapPath = \"character\",\n                cellSize = \"numeric\"),\n  definition = function(studyAreaMap, studyAreaMapPath,\n                        ecoregionMap, ecoregionMapPath,\n                        cellSize) {\n    \n  })\n\n\n",
+    "created" : 1460583411310.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3711476050",
+    "id" : "DF8C4BC6",
+    "lastKnownWriteTime" : 1460583418,
+    "path" : "~/GitHub/landwebNRV/landwebNRV/R/plotsByEcoregion.R",
+    "project_path" : "R/plotsByEcoregion.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

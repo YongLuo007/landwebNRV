@@ -1,0 +1,17 @@
+{
+    "contents" : "studyAreaMapPath <- \"C:/Users/yonluo/Documents/LandWeb\"\nstudyAreaMap <- \"landwebsimplePoly.rds\"\necoregionMapPath <- \"M:/data/Ecozones\"\necoregionMap <- \"ecozones.shp\"\n\ndd <- ecoregionClassification(studyAreaMap = studyAreaMap,\n                              studyAreaMapPath = studyAreaMapPath,\n                              ecoregionMap = ecoregionMap,\n                              ecoregionMapPath = ecoregionMapPath,\n                              cellSize = 1000)",
+    "created" : 1460583431029.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2136260702",
+    "id" : "AC52582E",
+    "lastKnownWriteTime" : 1460583464,
+    "path" : "~/GitHub/landwebNRV/runningFunctions.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
