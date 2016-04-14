@@ -1,12 +1,12 @@
 {
     "contents" : "\n\nstudyAreaMapPath <- \"C:/Users/yonluo/Documents/LandWeb\"\nstudyAreaMap <- \"landwebsimplePoly.rds\"\necoregionMapPath <- \"M:/data/Ecozones\"\necoregionMap <- \"ecozones.shp\"\nstudyAreaMapPath <- \"C:/Users/yonluo/Documents/LandWeb\"\nstudyAreaMap <- \"landwebsimplePoly.rds\"\necoregionMapPath <- \"M:/data/Ecozones\"\necoregionMap <- \"ecozones.shp\"\nstudyarea <- readRDS(file.path(studyAreaMapPath, studyAreaMap)) \necoregionMap <- rgdal::readOGR(file.path(ecoregionMapPath, ecoregionMap),\n                               layer = \"ecozones\")\n\n# this is the firest function\ndd <- ecoregionClassification(studyAreaMap = studyarea,\n                              ecoregionMap = ecoregionMap,\n                              cellSize = 1000)\n\nraster::writeRaster(dd,\n                    file.path(studyAreaMapPath, \"studyareaecoregion.tif\"),\n                    overwrite=TRUE)\n\nw <- rgdal::readGDAL(file.path(studyAreaMapPath, \"studyareaecoregion.tif\"))\nrgdal::writeGDAL(w, file.path(studyAreaMapPath, \"studyareaecoregion.tif\"),\n                 drivername = \"GTiff\", type = \"Int32\", mvFlag = 0)\n\n\nstudyAreaEcoregionMap <- \"studyareaecoregion.tif\"\ndd <- raster(file.path(studyAreaMapPath, studyAreaEcoregionMap))\n\nplotLocation <- data.table(expand.grid(longitude = seq(-120, -90, length = 20),\n                                       latitude = seq(52, 60, length = 20)))\nplotLocation[,PlotID:=1:nrow(plotLocation)]\n\nff <- plotsByEcoregion(plotLocation = plotLocation, studyAreaEcoregionMap = dd)\n",
     "created" : 1460583431029.000,
-    "dirty" : true,
+    "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
     "hash" : "691566253",
     "id" : "AC52582E",
-    "lastKnownWriteTime" : 1460583464,
+    "lastKnownWriteTime" : 1460594789,
     "path" : "~/GitHub/landwebNRV/runningFunctions.R",
     "project_path" : null,
     "properties" : {
