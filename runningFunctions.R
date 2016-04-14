@@ -35,11 +35,6 @@ plotLocation[,PlotID:=1:nrow(plotLocation)]
 
 ff <- plotsByEcoregion(plotLocation = plotLocation, studyAreaEcoregionMap = dd)
 
-
-
-
-
-
 filePath <- "C:/Users/Yong Luo/Documents/PSPs/Data/Data/AB/ESRDMaturePSPs2013"
 
 filePathMature <- "C:/Users/Yong Luo/Documents/PSPs/maturetest"
@@ -50,11 +45,22 @@ testmature <- obtainTreeDataAB(filePath = filePathMature, pspType = "Mature")
 testjuvenile <- obtainTreeDataAB(filePath = filePathJuvenile, pspType = "Juvenile")
 
 
+setwd("C:/Users/predecol/Documents/PSPs/BC")
+plotheader <- read.csv("Plotsummary.csv",header=TRUE,stringsAsFactor=FALSE) %>%
+  data.table
+setnames(plotheader,c("SAMP_ID","utm_zone","utm_easting","utm_northing","sampletype"),
+         c("Plotnumber","Zone","Easting","Northing","Datatype"))
+plot_withlocation  <- plotheader[,.(Plotnumber, Zone, Easting, Northing)]
+utmdata <- unique(plot_withlocation, by = c("Plotnumber"))
 
 
 
+coordRefTo <- "+proj=longlat +ellps=GRS80 +no_defs"
 
 
+
+dd <- UTMtoLongLat(UTMTable = utmdata, 
+                   coordRefTo = coordRefTo)
 
 
 
