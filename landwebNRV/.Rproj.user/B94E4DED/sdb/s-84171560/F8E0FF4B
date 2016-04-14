@@ -1,0 +1,17 @@
+{
+    "contents" : "rm(list=ls())\nlibrary(data.table)\nsetwd(\"C:/Users/predecol/Documents/PSPs/BC\")\n# load tree data\ntreedata <- read.csv(\"Trees.csv\",header=TRUE,stringsAsFactor=FALSE)\ntreedata <- data.table(treedata)\nprint(length(unique(treedata$SAMP_ID))) # 3793\ntreedata_noMeasureYear <- treedata[is.na(meas_yr),]\nprint(length(unique(treedata_noMeasureYear$SAMP_ID))) # 2142 do not have measurement year\ntreedata_withMeasureYear <- treedata[!is.na(meas_yr),]\nprint(length(unique(treedata_withMeasureYear$SAMP_ID))) # 1651 have measurement year\n\n# for the treedata without measurement year \n# assign measurement year if the plot was only measured once, \n# i.e., meas_yr_first == meas_yr_last in the plot summary table\n\n\n# load plot header data\nplotheader <- read.csv(\"Plotsummary.csv\",header=TRUE,stringsAsFactor=FALSE)\nplotheader <- data.table(plotheader)\nprint(length(unique(plotheader$SAMP_ID))) # 3793\n\nprint(nrow(plotheader))\nprint(sort(unique(plotheader$sampletype)))\n# [1] \"CMI\" \"CMO\" \"G\"   \"I\"   \"R\"   \"T\"   \"VRI\" \"YSM\"\n# G  \tGrowth Natural Permanent Plots (subjectively located)\t\n# R\t\tResearch-based untreated control Plots\t\n# VRI\t\tVRI Phase II 5-point clusters (PPSWR-based selection)\t\n# CMI\t\tChange Monitoring Inventory (estab on 20km NFI grid)\t\n# YSM\t\tChange Monitoring Inventory (grid-based young stands)\t\n# CMO\t\tChange Monitoring Inventory (PPSWR-based selection)\t\n# T\t\tSilviculturally Treated Program (discontinued)\t\n# I\t\tIntensitve Forestry Program (discontinued)\t\n# EP\t\tResearch Branch Experimental Projects\t\nplot_withlocation <- plotheader[!is.na(utm_zone) & !is.na(utm_easting) & !is.na(utm_northing),]\nprint(length(unique(plot_withlocation$SAMP_ID))) # 3662 plots have location\nsetnames(plot_withlocation,c(\"SAMP_ID\",\"utm_zone\",\"utm_easting\",\"utm_northing\",\"sampletype\"),\n         c(\"Plotnumber\",\"Zone\",\"Easting\",\"Northing\",\"Datatype\"))\nplot_withlocation <- plot_withlocation[,.(Plotnumber,Zone,Easting,Northing,Datatype)] %>%\n  unique(,by=\"Plotnumber\")\nplot_withlocation[,Datatype:=paste(\"BC_\",Datatype,sep=\"\")]\n",
+    "created" : 1460618434671.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3978625422",
+    "id" : "F8E0FF4B",
+    "lastKnownWriteTime" : 1442967752,
+    "path" : "~/PSPs/BC/dataorganizing.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
