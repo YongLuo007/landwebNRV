@@ -34,3 +34,29 @@ plotLocation <- data.table(expand.grid(longitude = seq(-120, -90, length = 20),
 plotLocation[,PlotID:=1:nrow(plotLocation)]
 
 ff <- plotsByEcoregion(plotLocation = plotLocation, studyAreaEcoregionMap = dd)
+
+
+
+
+
+
+filePath <- "C:/Users/Yong Luo/Documents/PSPs/Data/Data/AB/ESRDMaturePSPs2013"
+
+filePathMature <- "C:/Users/Yong Luo/Documents/PSPs/maturetest"
+filePathJuvenile <- "C:/Users/Yong Luo/Documents/PSPs/juveniletest"
+
+
+testmature <- obtainTreeDataAB(filePath = filePathMature, pspType = "Mature")
+testjuvenile <- obtainTreeDataAB(filePath = filePathJuvenile, pspType = "Juvenile")
+
+
+
+
+
+
+
+
+
+
+
+
