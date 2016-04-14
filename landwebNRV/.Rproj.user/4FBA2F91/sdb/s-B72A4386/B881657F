@@ -1,0 +1,17 @@
+{
+    "contents" : "################################################################################\n#' UTM to LongLat translator\n#' \n#' \n#' @param UTMTable  data table. It must have three columns of Zone, Easting and Northing\n#'\n#' \n#' @param coordRefTo,  Character string. Define the spatial coordination reference that you wish to transform.\n#'        Default is \"+proj=longlat\" without further specification             \n#'                  \n#'        \n#'\n#' @return  two data tables, the first one contains the fransformed longitude and latitude.\n#'          The second one was the failed to transform due to missing information of UTM coordinates, ie., Zone, \n#'          Easting and Northing. \n#'                      \n#'\n#' @note no note\n#'\n#' @seealso no\n#'\n#' @include \n#' @export\n#' @docType methods\n#' @rdname UTMtoLongLat\n#'\n#' @author Yong Luo\n#'\n#' @examples\n#' \\dontrun{\n#' \n#' }\nsetGeneric(\"UTMtoLongLat\", function(UTMTable, coordRefTo) {\n  standardGeneric(\"UTMtoLongLat\")\n})\n#' @export\n#' @rdname UTMtoLongLat\nsetMethod(\n  \"UTMtoLongLat\",\n  signature = c(UTMTable = \"data.table\", \n                coordRefTo = \"character\"),\n  definition = function(UTMTable, coordRefTo) {\n    output <- UTMTable[1,]\n    output[,':='(Longitude = 0, Latitude = 0)]\n    fullUTMInfor <- UTMTable[!is.na(Zone) & !is.na(Easting) & !is.na(Northing),]\n    missingUTMInfor <- UTMTable[is.na(Zone) | is.na(Easting) | is.na(Northing),]\n    utmZones <- unique(fullUTMInfor$Zone)\n    for(utmZone in utmZones){\n      crsUTMstring <- CRS(paste(\"+proj=utm +zone=\", utmZone, sep=\"\"))\n      utmcoor <- SpatialPoints(cbind(fullUTMInfor[Zone == utmZone, ]$Easting,\n                                     fullUTMInfor[Zone == utmZone, ]$Northing),\n                             proj4string = crsUTMstring)\n      longlatcoor <- spTransform(utmcoor, CRS(coordRefTo))\n      transformed <- data.table(attributes(longlatcoor)$coords)\n      names(transformed) <- c(\"Longitude\", \"Latitude\")\n      outputAdded <- cbind(fullUTMInfor[Zone == utmZone, ], transformed)\n      output <- rbindlist(list(output, outputAdded))\n    }\n    output <- output[-1, ]\n    return(list(Transformed  = output, UnTransformed  = missingUTMInfor))\n  })\n\n\n#' @export\n#' @rdname UTMtoLongLat\nsetMethod(\n  \"UTMtoLongLat\",\n  signature = c(UTMTable = \"data.table\", \n                coordRefTo = \"missing\"),\n  definition = function(UTMTable) {\n    ecoregionClassification(UTMTable = UTMTable, \n                            coordRefTo = \"+proj=longlat\")\n  })    \n\n",
+    "created" : 1460657292446.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "600961971",
+    "id" : "B881657F",
+    "lastKnownWriteTime" : 1460661841,
+    "path" : "~/GitHub/landwebNRV/landwebNRV/R/UTMtoLongLat.R",
+    "project_path" : "R/UTMtoLongLat.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
