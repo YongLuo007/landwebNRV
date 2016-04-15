@@ -79,12 +79,12 @@ setMethod(
       speciesTable[species == "AT", newSpeciesName := "trembling aspen"]
       speciesTable[species == "E", newSpeciesName := "white birch"]
       # E for birch in original doc. assume S is white birch
-      speciesTable[species == "XC", newSpeciesName := "unknow conifer"]
+      # speciesTable[species == "XC", newSpeciesName := "unknow conifer"]
       speciesTable[species == "BL", newSpeciesName := "alpine fir"]
       speciesTable[species == "EA", newSpeciesName := "white birch"]
       # EA is alaka paper birch, assume it is white birch here
       speciesTable[species == "AC", newSpeciesName := "balsam poplar"]
-      speciesTable[species == "X", newSpeciesName := "unknown"]
+      # speciesTable[species == "X", newSpeciesName := "unknown"]
       speciesTable[species == "B", newSpeciesName := "fir"]
       speciesTable[species == "W", newSpeciesName := "willow"]
       speciesTable[species == "DR", newSpeciesName := "red alder"]
@@ -108,7 +108,7 @@ setMethod(
       speciesTable[species == "CW", newSpeciesName := "western redcedar"]
       speciesTable[species == "HW", newSpeciesName := "western hemlock"]
       speciesTable[species == "FDI", newSpeciesName := "douglas-fir"]
-      speciesTable[species == "SXE", newSpeciesName := "unknown"]
+      # speciesTable[species == "SXE", newSpeciesName := "unknown"]
       speciesTable[species == "D", newSpeciesName := "red alder"]
       # D is alder, assume red alder
       speciesTable[species == "H", newSpeciesName := "western hemlock"]
@@ -119,7 +119,7 @@ setMethod(
       speciesTable[species == "AX", newSpeciesName := "trembling aspen"]
       # hybrid poplars for AX, assume trembling aspen
     } else if(forestInventorySource == "ABPSP"){
-      speciesTable[species == "  ", newSpeciesName := "unknown"]
+      # speciesTable[species == "  ", newSpeciesName := "unknown"]
       speciesTable[species == "AW", newSpeciesName := "trembling aspen"]
       speciesTable[species == "BW", newSpeciesName := "white birch"]
       speciesTable[species == "FA", newSpeciesName := "alpine fir"]
@@ -127,7 +127,7 @@ setMethod(
       speciesTable[species == "FD", newSpeciesName := "douglas-fir"]
       speciesTable[species == "LA", newSpeciesName := "alpine larch"]
       speciesTable[species == "LT", newSpeciesName := "tamarack larch"]
-      speciesTable[species == "P ", newSpeciesName := "unknown"]
+      # speciesTable[species == "P ", newSpeciesName := "unknown"]
       speciesTable[species == "PB", newSpeciesName := "balsam poplar"]
       speciesTable[species == "PF", newSpeciesName := "limber pine"]
       speciesTable[species == "PJ", newSpeciesName := "jack pine"]
@@ -136,13 +136,50 @@ setMethod(
       speciesTable[species == "SB", newSpeciesName := "black spruce"]
       speciesTable[species == "SE", newSpeciesName := "englemann spruce"]
       speciesTable[species == "SW", newSpeciesName := "white spruce"]
-    } else if(forestInventorySource == "SKPSP"){
+    } else if(forestInventorySource == "SKPSP" | forestInventorySource == "SKTSP"){
+      # speciesTable[species == "", newSpeciesName := "unknown"]
+      speciesTable[species == "BF", newSpeciesName := "balsam fir"]
+      speciesTable[species == "BP", newSpeciesName := "balsam poplar"]
+      speciesTable[species == "BS", newSpeciesName := "black spruce"]
+      # speciesTable[species == "DC", newSpeciesName := "unknown"] # what is this
+      # speciesTable[species == "DD", newSpeciesName := "unknown"] # what is this
+      # speciesTable[species == "DU", newSpeciesName := "unknown"] # what is this
+      speciesTable[species == "GA", newSpeciesName := "green ash"]
+      speciesTable[species == "JP", newSpeciesName := "jack pine"]
+      speciesTable[species == "MM", newSpeciesName := "manitoba maple"]
+      # speciesTable[species == "PC", newSpeciesName := "unknown"] # what is this
+      speciesTable[species == "TA", newSpeciesName := "trembling aspen"]
+      speciesTable[species == "TL", newSpeciesName := "tamarack larch"]
+      # speciesTable[species == "UI", newSpeciesName := "unknown"] # what is this
+      speciesTable[species == "WB", newSpeciesName := "white birch"]
+      speciesTable[species == "WE", newSpeciesName := "white elm"]
+      speciesTable[species == "WS", newSpeciesName := "white spruce"]
+      # speciesTable[species == "XX", newSpeciesName := "unknown"] # what is this
+    } else if(forestInventorySource == "NWTTSP"){
+      speciesTable[species == "A", newSpeciesName := "trembling aspen"]
+      speciesTable[species == "BW", newSpeciesName := "white birch"]
+      speciesTable[species == "Bw", newSpeciesName := "white birch"]
+      speciesTable[species == "F", newSpeciesName := "fir"]
+      speciesTable[species == "L", newSpeciesName := "tamarack larch"]
+      speciesTable[species == "Pj", newSpeciesName := "jack pine"]
+      speciesTable[species == "PJ", newSpeciesName := "jack pine"]
+      speciesTable[species == "Pl", newSpeciesName := "lodgepole pine"]
+      speciesTable[species == "PL", newSpeciesName := "lodgepole pine"]
+      speciesTable[species == "Po", newSpeciesName := "balsam poplar"]
+      speciesTable[species == "PO", newSpeciesName := "balsam poplar"]
+      speciesTable[species == "Sb", newSpeciesName := "black spruce"]
+      speciesTable[species == "SB", newSpeciesName := "black spruce"]
+      speciesTable[species == "sw", newSpeciesName := "white spruce"]
+      speciesTable[species == "Sw", newSpeciesName := "white spruce"]
+      speciesTable[species == "SW", newSpeciesName := "white spruce"]
+      speciesTable[species == "W", newSpeciesName := "willow"]
+    } else if(forestInventorySource == "NFIPSP"){
       
       
-      
-      ""   "BF" "BP" "BS" "JP" "MM" "PC" "TA" "TL" "UI" "WB" "WS" "XX"
-    } else if(forestInventorySource == "NWTPSP"){
-      
+      [1] "ALN" "BAL" "BAN" "CAN" "CON" "COR" "CRI" "ENG" "GLA"
+      [10] "INC" "LAR" "LAS" "MAC" "MAR" "NAN" "NEO" "OCC" "PAP"
+      [19] "PED" "PEN" "PLA" "PUM" "RUB" "SCO" "SPI" "SPP" "STO"
+      [28] "TRE" "VIR"
     } else {
       stop("Please define the correct forestInventorySource among ")
     }
