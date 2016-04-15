@@ -1,10 +1,10 @@
 {
-    "contents" : "",
+    "contents" : "workingPath <- \"C:/Users/Yong Luo/Documents/PSPs/Data/Data/NRCAN/NFI_PSP\"\ntreedata1 <- read.csv(file.path(workingPath, \"all_gp_ltp_tree.csv\"),\n                  header = TRUE,\n                  stringsAsFactors = FALSE)\ntreedata2 <- read.csv(file.path(workingPath, \"all_gp_stp_tree.csv\"),\n                  header = TRUE,\n                  stringsAsFactors = FALSE)\n\nmistsp <- read.csv(file.path(workingPath, \"SK_TSP_Mistic_TreeData.csv\"),\n                   header = TRUE,\n                   stringsAsFactors = FALSE)\n\n\n\n\n",
     "created" : 1460603298356.000,
-    "dirty" : false,
+    "dirty" : true,
     "encoding" : "",
     "folds" : "",
-    "hash" : "0",
+    "hash" : "2074424294",
     "id" : "DB089EC",
     "lastKnownWriteTime" : 0,
     "path" : null,
