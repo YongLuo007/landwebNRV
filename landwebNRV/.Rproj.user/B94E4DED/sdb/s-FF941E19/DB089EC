@@ -1,0 +1,18 @@
+{
+    "contents" : "workingPath <- \"C:/Users/Yong Luo/Documents/PSPs/Data/Data/NT/GNWT_forinv_export_entireDB_apr152015/data\"\ntreedata1 <- read.csv(file.path(workingPath, \"WESBOGY_TREE.csv\"),\n                  header = TRUE,\n                  stringsAsFactors = FALSE)\ntreedata2 <- read.csv(file.path(workingPath, \"all_gp_stp_tree.csv\"),\n                  header = TRUE,\n                  stringsAsFactors = FALSE)\n\nmistsp <- read.csv(file.path(workingPath, \"SK_TSP_Mistic_TreeData.csv\"),\n                   header = TRUE,\n                   stringsAsFactors = FALSE)\n\n\n\n\n",
+    "created" : 1460603298356.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1457978126",
+    "id" : "DB089EC",
+    "lastKnownWriteTime" : 0,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
