@@ -119,9 +119,28 @@ setMethod(
       speciesTable[species == "AX", newSpeciesName := "trembling aspen"]
       # hybrid poplars for AX, assume trembling aspen
     } else if(forestInventorySource == "ABPSP"){
-      
+      speciesTable[species == "  ", newSpeciesName := "unknown"]
+      speciesTable[species == "AW", newSpeciesName := "trembling aspen"]
+      speciesTable[species == "BW", newSpeciesName := "white birch"]
+      speciesTable[species == "FA", newSpeciesName := "alpine fir"]
+      speciesTable[species == "FB", newSpeciesName := "balsam fir"]
+      speciesTable[species == "FD", newSpeciesName := "douglas-fir"]
+      speciesTable[species == "LA", newSpeciesName := "alpine larch"]
+      speciesTable[species == "LT", newSpeciesName := "tamarack larch"]
+      speciesTable[species == "P ", newSpeciesName := "unknown"]
+      speciesTable[species == "PB", newSpeciesName := "balsam poplar"]
+      speciesTable[species == "PF", newSpeciesName := "limber pine"]
+      speciesTable[species == "PJ", newSpeciesName := "jack pine"]
+      speciesTable[species == "PL", newSpeciesName := "lodgepole pine"]
+      speciesTable[species == "PW", newSpeciesName := "whitebark pine"]
+      speciesTable[species == "SB", newSpeciesName := "black spruce"]
+      speciesTable[species == "SE", newSpeciesName := "englemann spruce"]
+      speciesTable[species == "SW", newSpeciesName := "white spruce"]
     } else if(forestInventorySource == "SKPSP"){
       
+      
+      
+      ""   "BF" "BP" "BS" "JP" "MM" "PC" "TA" "TL" "UI" "WB" "WS" "XX"
     } else if(forestInventorySource == "NWTPSP"){
       
     } else {
