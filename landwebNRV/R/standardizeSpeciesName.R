@@ -7,11 +7,12 @@
 #'
 #' 
 #' @param forestInventorySource,  Character string. Give the forest inventory data source             
-#'                  
+#'        Currently support MBPSP, MBTSP, ABPSP, BCPSP, SKPSP, SKTSP and NFIPSP           
 #'        
 #'
-#' @return  two data tables, the first one contains successfully standardized species.
-#'          The second one contains unsuccessfully standardized species.
+#' @return  a data tables, the first one contains successfully standardized species.
+#'          the newSpeciesName is the standardized name, unknown means the species in 
+#'          the original species table can not be found according to manual
 #'                      
 #'
 #' @note no note
@@ -177,27 +178,101 @@ setMethod(
       speciesTable[species == "SW", newSpeciesName := "white spruce"]
       speciesTable[species == "W", newSpeciesName := "willow"]
     } else if(forestInventorySource == "NFIPSP"){
+      # the species code system in NFI is different from provincial systems
+      # the speciesTable for NFIPSP must have genus and species column 
       
+      speciesTable[genus == "ABIE", species == "BAL",
+                   newSpeciesName := "balsam fir"]
+      speciesTable[genus == "ABIE", species == "LAS",
+                   newSpeciesName := "subalpine fir"]
+      speciesTable[genus == "ACER", species == "SPI",
+                   newSpeciesName := "mountain maple"]
+      speciesTable[genus == "ALNU", species == "SPP",
+                   newSpeciesName := "alder"]
+      speciesTable[genus == "ALNU", species == "INC",
+                   newSpeciesName := "gray alder"]
+      speciesTable[genus == "ALNU", species == "RUB",
+                   newSpeciesName := "red alder"]
+      speciesTable[genus == "ALNU", species == "CRI",
+                   newSpeciesName := "alder"]
+      speciesTable[genus == "ALNU", species == "VIR",
+                   newSpeciesName := "sitka alder"]
+      speciesTable[genus == "AMEL", species == "ALN",
+                   newSpeciesName := "saskatoon-berry"]
+      speciesTable[genus == "BETU", species == "GLA",
+                   newSpeciesName := "birch"]
       
-      [1] "ALN" "BAL" "BAN" "CAN" "CON" "COR" "CRI" "ENG" "GLA"
-      [10] "INC" "LAR" "LAS" "MAC" "MAR" "NAN" "NEO" "OCC" "PAP"
-      [19] "PED" "PEN" "PLA" "PUM" "RUB" "SCO" "SPI" "SPP" "STO"
-      [28] "TRE" "VIR"
+      speciesTable[genus == "BETU", species == "NAN",
+                   newSpeciesName := "birch"] # not found
+      speciesTable[genus == "BETU", species == "GLA",
+                   newSpeciesName := "birch"] # not found
+      speciesTable[genus == "BETU", species == "NEO",
+                   newSpeciesName := "white birch"] # alaska paper birch
+      speciesTable[genus == "BETU", species == "OCC",
+                   newSpeciesName := "white birch"] # water birch
+      speciesTable[genus == "BETU", species == "PAP",
+                   newSpeciesName := "white birch"] 
+      speciesTable[genus == "BETU", species == "PUM",
+                   newSpeciesName := "birch"] # not found
+      speciesTable[genus == "BETU", species == "SPP",
+                   newSpeciesName := "birch"] # water birch
+      speciesTable[genus == "CORN", species == "STO",
+                   newSpeciesName := "redosier dogwood"] # water birch
+      speciesTable[genus == "CORY", species == "COR",
+                   newSpeciesName := "unknown"] # water birch
+      speciesTable[genus == "FRAX", species == "PEN",
+                   newSpeciesName := "red ash"] 
+      speciesTable[genus == "GENC", species == "SPP",
+                   newSpeciesName := "softwood"] 
+      speciesTable[genus == "GENH", species == "SPP",
+                   newSpeciesName := "hardwood"] 
+      speciesTable[genus == "LARI", species == "LAR",
+                   newSpeciesName := "tamarack larch"] 
+      speciesTable[genus == "LARI", species == "OCC",
+                   newSpeciesName := "western larch"] 
+      speciesTable[genus == "PICE", species == "ENG",
+                   newSpeciesName := "engelmann spruce"] 
+      speciesTable[genus == "PICE", species == "GLA",
+                   newSpeciesName := "white spruce"] 
+      speciesTable[genus == "PICE", species == "MAR",
+                   newSpeciesName := "black spruce"] 
+      speciesTable[genus == "PICE", species == "SPP",
+                   newSpeciesName := "spruce"] 
+      speciesTable[genus == "PINU", species == "BAN",
+                   newSpeciesName := "jack pine"] 
+      speciesTable[genus == "PINU", species == "CON",
+                   newSpeciesName := "lodgepole pine"] 
+      speciesTable[genus == "POPU", species == "BAL",
+                   newSpeciesName := "balsam poplar"] 
+      speciesTable[genus == "POPU", species == "SPP",
+                   newSpeciesName := "poplar"] 
+      speciesTable[genus == "POPU", species == "TRE",
+                   newSpeciesName := "trembling aspen"]
+      speciesTable[genus == "PRUN", species == "PEN",
+                   newSpeciesName := "pin cherry"]
+      speciesTable[genus == "PRUN", species == "VIR",
+                   newSpeciesName := "choke cherry"]
+      speciesTable[genus == "QUER", species == "MAC",
+                   newSpeciesName := "bur oak"]
+      speciesTable[genus == "SALI", species == "PED",
+                   newSpeciesName := "willow"] # not found assume willow
+      speciesTable[genus == "SALI", species == "PLA",
+                   newSpeciesName := "willow"] # not found assume willow
+      speciesTable[genus == "SALI", species == "SCO",
+                   newSpeciesName := "scouler willow"]
+      speciesTable[genus == "SALI", species == "SPP",
+                   newSpeciesName := "willow"]
+      speciesTable[genus == "SALI", species == "SPP",
+                   newSpeciesName := "willow"]
+      speciesTable[genus == "SHEP", species == "CAN",
+                   newSpeciesName := "berry"] # not found assume berry
+      speciesTable[genus == "UNKN", species == "SPP",
+                   newSpeciesName := "unknown"] # 
     } else {
       stop("Please define the correct forestInventorySource among ")
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    speciesTable[is.na(newSpeciesName), newSpeciesName := "unknown"]
+    return(speciesTable)
   })
 
 
