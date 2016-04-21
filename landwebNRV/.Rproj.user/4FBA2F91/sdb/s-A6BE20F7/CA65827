@@ -1,0 +1,17 @@
+{
+    "contents" : "################################################################################\n#' purify BC PSP data \n#' \n#' \n#' @param treeDataRaw  data table, which is the raw tree data from DAT file, recordType == 2\n#'                  treeData can be obtained using obtainTreeDataAB function\n#'\n#' \n#' @param headDataRaw data.table, which is PSPDATA2015B, provided by AB\n#'        \n#'\n#' @return  two data tables, the first one head data, which contains the location and SA info.\n#'                           the second one is purified tree data, which contains inividual tree infor.\n#'                           for the tree data, all trees are alive.\n#'                      \n#'\n#' @note no note\n#'\n#' @seealso no\n#'\n#' @include \n#' @export\n#' @docType methods\n#' @rdname dataPurification_BCMature\n#'\n#' @author Yong Luo\n#'\n#' @examples\n#' \\dontrun{\n#' \n#' }\nsetGeneric(\"dataPurification_BCMature\", function(treeDataRaw, headDataRaw) {\n  standardGeneric(\"dataPurification_BCMature\")\n})\n#' @export\n#' @rdname dataPurification_BCMature\nsetMethod(\n  \"dataPurification_BCMature\",\n  signature = c(treeDataRaw = \"data.table\", \n                headDataRaw = \"data.table\"),\n  definition = function(treeDataRaw, headDataRaw) {\n    \n    \n    \n    \n    \n\n  })\n",
+    "created" : 1461191541983.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1945881426",
+    "id" : "CA65827",
+    "lastKnownWriteTime" : 1461197492,
+    "path" : "~/GitHub/landwebNRV/landwebNRV/R/dataPurification_BCMature.R",
+    "project_path" : "R/dataPurification_BCMature.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
