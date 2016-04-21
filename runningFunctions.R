@@ -62,7 +62,16 @@ coordRefTo <- "+proj=longlat +ellps=GRS80 +no_defs"
 dd <- UTMtoLongLat(UTMTable = utmdata, 
                    coordRefTo = coordRefTo)
 
+rm(list=ls())
+treedataraw <- read.csv("C:/Users/yonluo/Documents/LandWeb/Data/AB/ABMatureTreeData.csv",
+                        header = TRUE,
+                        stringsAsFactor = FALSE) %>%
+  data.table
+headdataraw <- read.csv("C:/Users/yonluo/Documents/LandWeb/Data/AB/plotLocation.csv",
+                        header = TRUE,
+                        stringsAsFactor = FALSE) %>%
+  data.table
 
-
-
-
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_ABMature.R')
+ls()
+output <- dataPurification_ABMature(treeDataRaw = treedataraw, headDataRaw = headdataraw)
