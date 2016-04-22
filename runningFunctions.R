@@ -86,7 +86,8 @@ load("BC_PSP.RData")
 dd <- dataPurification_BC(treeDataRaw = treedata, headDataRaw = plotheader)
 
 rm(list=ls())
-setwd("C:/Users/yonluo/Documents/LandWeb/Data/SK")
+setwd("~/LandWeb/Data/SK")
+
 load("SKPSP.RData")
 SADataRaw <- plotheader1
 plotHeadRaw <- plotheader2
