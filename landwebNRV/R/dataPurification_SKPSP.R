@@ -54,24 +54,47 @@ setMethod(
     # range(SADataRaw$COUNTED_AGE) # NA NA
     # range(SADataRaw$TOTAL_AGE) # NA NA
     SADataRaw <- SADataRaw[!is.na(TOTAL_AGE),]
+    SADataRaw[, baseYear := min(YEAR), by = PLOT_ID]
+    SADataRaw[, treeAge := TOTAL_AGE-(YEAR-baseYear)]
     SADataRawDomSA <- SADataRaw[CROWN_CLASS == 1,] # the stand age first determined by dominant trees
+    SADataRawDomSA[, NofTrees:=length(CROWN_CLASS), by  = PLOT_ID]
+    # unique(SADataRawDomSA$NofTrees) # 1 2 3 4 5
+    # stand age must determined by using at least 2 trees
+    SADataRawDomSA <- SADataRawDomSA[NofTrees != 1,]
+    # SADataRawDomSA[, treeAgeDif:=max(treeAge)-min(treeAge), by = PLOT_ID]
+    # range(SADataRawDomSA$treeAgeDif) # 0 44
+    # mean(SADataRawDomSA$treeAgeDif) # 7.03
+    SADataRawDomSA[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
+    SADataRawDomSA <- unique(SADataRawDomSA[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID")
+    # for the other plots determine SA using codominant trees
+    SADataRawCodomSA <- SADataRaw[CROWN_CLASS == 2,]
+    
+    SADataRawCodomSA <- SADataRawCodomSA[!(PLOT_ID %in% unique(SADataRawDomSA$PLOT_ID)),]
+    SADataRawCodomSA[, NofTrees:=length(CROWN_CLASS), by  = PLOT_ID]
+    # unique(SADataRawCodomSA$NofTrees)
+    SADataRawCodomSA <- SADataRawCodomSA[NofTrees != 1,]
+    SADataRawCodomSA[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
+    SADataRawCodomSA <- unique(SADataRawCodomSA[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID") 
+    headData_SA <- rbind(SADataRawDomSA, SADataRawCodomSA)
+    
+    headData_loca <- plotHeadRaw[PLOT_ID %in% unique(headData_SA$PLOT_ID),][
+      ,.(PLOT_ID, Z13nad83_e, Z13nad83_n, Zone = 13)]
+    names(headData_loca)[2:3] <- c("Easting", "Northing")
+    headData_SALoca <- setkey(headData_SA, PLOT_ID)[setkey(headData_loca, PLOT_ID),
+                                                    nomatch = 0]
+    headData_PS <- measureHeadRaw[PLOT_ID %in% unique(headData_SALoca$PLOT_ID),][
+      ,.(PLOT_ID, PLOT_SIZE)][!is.na(PLOT_SIZE),]
+    headData_PS <- unique(headData_PS, by = "PLOT_ID")
+    setnames(headData_PS, "PLOT_SIZE", "Plotsize")
+    headData <- headData_SALoca[setkey(headData_PS, PLOT_ID), nomatch = 0]
     
     
+    # for tree data
+    treeDataRaw <- treeDataRaw[PLOT_ID %in% headData$PLOT_ID,][
+      ,.(PLOT_ID, TREE_NO, YEAR, SPECIES, DBH, HEIGHT, CONDITION_CODE1,
+         CONDITION_CODE2, CONDITION_CODE3, MORTALITY)]
     
-    
-        
-    # SA1_3 <- SADataRaw[BORED_HEIGHT == 1.3 & !is.na(COUNTED_AGE),]
-    # unique(SA1_3$TOTAL_AGE) # NA  there is no empirical age difference between 1.3 counted and total age
-    # the total age for these trees are corrected by 7+counted age (chen at al.)
-    # SADataRaw[is.na(TOTAL_AGE), TOTAL_AGE := as.numeric(COUNTED_AGE)+7]
-    # range(SADataRaw$TOTAL_AGE) # 6 214
-    SADataRaw[, baseYear:=min(YEAR), by = PLOT_ID]
-    SADataRaw[, SA:=TOTAL_AGE-(YEAR-baseYear)]
-    SADataRaw[, SAdif:=max(SA)-min(SA), by = PLOT_ID]
-    range(SADataRaw$SAdif) # 0 127 that is too much difference within one plot
-    # SADataRaw[SAdif == 110,]$SA
-    
-    
+    # choose living trees
     
     
     
