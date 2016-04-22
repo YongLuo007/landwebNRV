@@ -75,3 +75,21 @@ headdataraw <- read.csv("C:/Users/yonluo/Documents/LandWeb/Data/AB/plotLocation.
 source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_ABMature.R')
 ls()
 output <- dataPurification_ABMature(treeDataRaw = treedataraw, headDataRaw = headdataraw)
+
+
+
+rm(list=ls())
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_BCMature.R')
+setwd("C:/Users/yonluo/Documents/LandWeb/Data/BC")
+load("BC_PSP.RData")
+
+dd <- dataPurification_BC(treeDataRaw = treedata, headDataRaw = plotheader)
+
+rm(list=ls())
+setwd("C:/Users/yonluo/Documents/LandWeb/Data/SK")
+load("SKPSP.RData")
+SADataRaw <- plotheader1
+plotHeadRaw <- plotheader2
+measureHeadRaw <- plotheader3
+treeDataRaw <- treedata
+
