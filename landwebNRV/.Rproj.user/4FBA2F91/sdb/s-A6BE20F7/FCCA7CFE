@@ -1,0 +1,17 @@
+{
+    "contents" : "################################################################################\n#' purify SK PSP data \n#' \n#' \n#' @param SADataRaw  data table, is age_samples in the MS access file\n#' \n#' \n#' @param plotHeadRaw data.table, is plot_header in MS access file\n#' \n#' @param measureHeadRaw data.table, is mearsurement_header in MS access file\n#'        \n#' @param treeDataRaw data.table, is trees in MS access file\n#'\n#' @return  two data tables, the first one head data, which contains the location and SA info.\n#'                           the second one is purified tree data, which contains inividual tree infor.\n#'                           for the tree data, all trees are alive.\n#'                      \n#'\n#' @note no note\n#'\n#' @seealso no\n#'\n#' @include \n#' @export\n#' @docType methods\n#' @rdname dataPurification_SKPSP\n#'\n#' @author Yong Luo\n#'\n#' @examples\n#' \\dontrun{\n#' \n#' }\nsetGeneric(\"dataPurification_SKPSP\", function(SADataRaw, plotHeadRaw,\n                                              measureHeadRaw, treeDataRaw) {\n  standardGeneric(\"dataPurification_SKPSP\")\n})\n#' @export\n#' @rdname dataPurification_SKPSP\nsetMethod(\n  \"dataPurification_SKPSP\",\n  signature = c(SADataRaw = \"data.table\", \n                plotHeadRaw = \"data.table\",\n                measureHeadRaw = \"data.table\",\n                treeDataRaw = \"data.table\"),\n  definition = function(SADataRaw, plotHeadRaw,\n                        measureHeadRaw, treeDataRaw) {\n    rm(list=ls())\n    load(\"SKPSP.RData\")\n    SADataRaw <- plotheader1\n    plotHeadRaw <- plotheader3\n    measureHeadRaw <- plotheader2\n    treeDataRaw <- treedata\n    # range(SADataRaw$COUNTED_AGE) # NA NA\n    # range(SADataRaw$TOTAL_AGE) # NA NA\n    SADataRaw <- SADataRaw[!is.na(TOTAL_AGE),]\n    SADataRawDomSA <- SADataRaw[CROWN_CLASS == 1,] # the stand age first determined by dominant trees\n    \n    \n    \n    \n        \n    # SA1_3 <- SADataRaw[BORED_HEIGHT == 1.3 & !is.na(COUNTED_AGE),]\n    # unique(SA1_3$TOTAL_AGE) # NA  there is no empirical age difference between 1.3 counted and total age\n    # the total age for these trees are corrected by 7+counted age (chen at al.)\n    # SADataRaw[is.na(TOTAL_AGE), TOTAL_AGE := as.numeric(COUNTED_AGE)+7]\n    # range(SADataRaw$TOTAL_AGE) # 6 214\n    SADataRaw[, baseYear:=min(YEAR), by = PLOT_ID]\n    SADataRaw[, SA:=TOTAL_AGE-(YEAR-baseYear)]\n    SADataRaw[, SAdif:=max(SA)-min(SA), by = PLOT_ID]\n    range(SADataRaw$SAdif) # 0 127 that is too much difference within one plot\n    # SADataRaw[SAdif == 110,]$SA\n    \n    \n    \n    \n    \n    return(list(treeData = treeData, headData = headData))\n  })\n",
+    "created" : 1461278752591.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2340285376",
+    "id" : "FCCA7CFE",
+    "lastKnownWriteTime" : 1461283943,
+    "path" : "~/GitHub/landwebNRV/landwebNRV/R/dataPurification_SKPSP.R",
+    "project_path" : "R/dataPurification_SKPSP.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
