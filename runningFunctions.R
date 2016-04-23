@@ -87,10 +87,40 @@ dd <- dataPurification_BC(treeDataRaw = treedata, headDataRaw = plotheader)
 
 rm(list=ls())
 setwd("~/LandWeb/Data/SK")
-
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_SKPSP.R')
 load("SKPSP.RData")
 SADataRaw <- plotheader1
-plotHeadRaw <- plotheader2
-measureHeadRaw <- plotheader3
+plotHeadRaw <- plotheader3
+measureHeadRaw <- plotheader2
 treeDataRaw <- treedata
+
+dd <- dataPurification_SKPSP(SADataRaw = SADataRaw, plotHeadRaw = plotHeadRaw,
+                             measureHeadRaw = measureHeadRaw, treeDataRaw= treeDataRaw)
+
+
+rm(list=ls())
+setwd("~/LandWeb/Data/SK")
+load("SKTSP_PAPP.RData")
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_SKTSP.R')
+
+PPoutput <- dataPurification_SKTSP(sampleTreeRaw = PPsampletree,
+                             plotHeadRaw = PPplotheader,
+                             treeDataRaw = PPtreedata)
+
+PAoutput <- dataPurification_SKTSP(sampleTreeRaw = PAsampletree,
+                                   plotHeadRaw = PAplotheader,
+                                   treeDataRaw = PAtreedata)
+
+rm(list=ls())
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_SKTSP_Mistic.R')
+load("SK_TSP_Mistic.RData")
+
+Mistikoutput <- dataPurification_SKTSP_Mistic(compiledPlotData = plotheader,
+                                          compiledTreeData = treedata)
+
+
+
+
+
+
 
