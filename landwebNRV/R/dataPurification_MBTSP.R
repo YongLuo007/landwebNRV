@@ -1,0 +1,54 @@
+################################################################################
+#' purify MB TSP data
+#' 
+#' 
+#' @param MBTSPDataRaw  data table, which is the raw tree data from DAT file, recordType == 2
+#'                  treeData can be obtained using obtainTreeDataAB function
+#'
+#'        
+#'
+#' @return  two data tables, the first one head data, which contains the location and SA info.
+#'                           the second one is purified tree data, which contains inividual tree infor.
+#'                           for the tree data, all trees are alive.
+#'                      
+#'
+#' @note no note
+#'
+#' @seealso no
+#'
+#' @include 
+#' @export
+#' @docType methods
+#' @rdname dataPurification_MBTSP
+#'
+#' @author Yong Luo
+#'
+#' @examples
+#' \dontrun{
+#' 
+#' }
+setGeneric("dataPurification_MBTSP", function(MBTSPDataRaw) {
+  standardGeneric("dataPurification_MBTSP")
+})
+#' @export
+#' @rdname dataPurification_MBTSP
+setMethod(
+  "dataPurification_MBTSP",
+  signature = c(MBTSPDataRaw = "data.table"),
+  definition = function(MBTSPDataRaw) {
+    rm(list=ls())
+    setwd("C:/Users/Yong Luo/Documents/PSPs/Data/Data/MB")
+    MBTSPDataRaw <- read.csv("MB_TSP_Highrock.csv",
+                             header = TRUE,
+                             stringsAsFactors = FALSE) %>%
+      data.table
+    # get SA information using dominant and codominant trees
+    MBTSPDataRaw <- MBTSPDataRaw[,Nofplot:=length(unique(PLOTNO)), by = TILE]
+    
+    headData <- MBTSPDataRaw[!is.na(AGE_BH) & (CC == "D" | CC == "C"),]
+    headData <- headData[, SA:=as.integer(mean(AGE_BH))+8, by = TILE]
+    headData[, Plotsize:=0.02*Nofplot]
+    headData <- headData[,.(TILE, )]
+    return(list(headData = headData,
+                treeData = treeData))
+  })
