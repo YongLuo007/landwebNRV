@@ -45,15 +45,10 @@ setMethod(
                 treeDataRaw = "data.table"),
   definition = function(SADataRaw, plotHeadRaw,
                         measureHeadRaw, treeDataRaw) {
-    rm(list=ls())
-    load("SKPSP.RData")
-    SADataRaw <- plotheader1
-    plotHeadRaw <- plotheader3
-    measureHeadRaw <- plotheader2
-    treeDataRaw <- treedata
     # range(SADataRaw$COUNTED_AGE) # NA NA
     # range(SADataRaw$TOTAL_AGE) # NA NA
-    SADataRaw <- SADataRaw[!is.na(TOTAL_AGE),]
+    # unique(SADataRaw$TREE_STATUS)
+    SADataRaw <- SADataRaw[!is.na(TOTAL_AGE) & TREE_STATUS == 1,]
     SADataRaw[, baseYear := min(YEAR), by = PLOT_ID]
     SADataRaw[, treeAge := TOTAL_AGE-(YEAR-baseYear)]
     SADataRawDomSA <- SADataRaw[CROWN_CLASS == 1,] # the stand age first determined by dominant trees
@@ -76,7 +71,6 @@ setMethod(
     SADataRawCodomSA[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
     SADataRawCodomSA <- unique(SADataRawCodomSA[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID") 
     headData_SA <- rbind(SADataRawDomSA, SADataRawCodomSA)
-    
     headData_loca <- plotHeadRaw[PLOT_ID %in% unique(headData_SA$PLOT_ID),][
       ,.(PLOT_ID, Z13nad83_e, Z13nad83_n, Zone = 13)]
     names(headData_loca)[2:3] <- c("Easting", "Northing")
@@ -91,12 +85,42 @@ setMethod(
     
     # for tree data
     treeDataRaw <- treeDataRaw[PLOT_ID %in% headData$PLOT_ID,][
-      ,.(PLOT_ID, TREE_NO, YEAR, SPECIES, DBH, HEIGHT, CONDITION_CODE1,
-         CONDITION_CODE2, CONDITION_CODE3, MORTALITY)]
+      ,.(PLOT_ID, TREE_NO, YEAR, SPECIES, DBH, HEIGHT, TREE_STATUS, 
+         CONDITION_CODE1, CONDITION_CODE2, CONDITION_CODE3, MORTALITY)]
     
-    # choose living trees
-    
-    
-    
-    return(list(treeData = treeData, headData = headData))
+    # check the living trees
+    # 1. by tree status codes
+    #     1 1 Live
+    #     2 2 Declining
+    #     3 3 Dead or dying
+    #     4 4 Loose bark snag
+    #     5 5 Clean snag
+    #     6 6 Snag with broken top
+    #     7 7 Decomposed snag.
+    #     8 8 Down snag
+    #     9 9 Stump
+    treeDataRaw <- treeDataRaw[is.na(TREE_STATUS) | # conservtively
+                                 TREE_STATUS == 0 |
+                                 TREE_STATUS == 1 |
+                                 TREE_STATUS == 2,]
+    # 2. by mortality codes
+    #     Null 0
+    #     Natural or Undetermined 1
+    #     Disease 2
+    #     Insect 3
+    #     Human 4
+    #     Wind 5
+    #     Snow 6
+    #     Other Trees 7
+    #     Hail or Ice Storm 8
+    treeDataRaw <- treeDataRaw[MORTALITY == 0 |
+                                 is.na(MORTALITY),]
+    # check the trees with both status and mortality are NA
+    # unique(treeDataRaw[is.na(TREE_STATUS) & is.na(MORTALITY), ]$CONDITIONCODE1)
+    # NULL
+    treeDataRaw <- treeDataRaw[,.(PLOT_ID, TREE_NO, YEAR, SPECIES,  DBH, HEIGHT)]
+    names(treeDataRaw) <- c("PlotID", "Treenumber", "Measureyear", "Species",
+                            "DBH", "Height")
+    setnames(headData, "PLOT_ID", "PlotID")
+    return(list(treeData = treeDataRaw, headData = headData))
   })
