@@ -118,9 +118,13 @@ load("SK_TSP_Mistic.RData")
 Mistikoutput <- dataPurification_SKTSP_Mistic(compiledPlotData = plotheader,
                                           compiledTreeData = treedata)
 
-
-
-
-
+rm(list=ls())
+setwd("C:/Users/Yong Luo/Documents/PSPs/Data/Data/MB")
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_MBPSP.R')
+MBPSPDataRaw <- read.csv("MBPSP_2012_file1.csv",
+                         header = TRUE,
+                         stringsAsFactors = FALSE) %>%
+  data.table
+MBdata <- dataPurification_MBPSP(MBPSPDataRaw = MBPSPDataRaw)
 
 
