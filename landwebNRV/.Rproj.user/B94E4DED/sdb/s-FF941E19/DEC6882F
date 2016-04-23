@@ -1,0 +1,18 @@
+{
+    "contents" : "################################################################################\n#' purify MB PSP data\n#' \n#' \n#' @param MBPSPDataRaw  data table, which is the raw tree data from DAT file, recordType == 2\n#'                  treeData can be obtained using obtainTreeDataAB function\n#'\n#'        \n#'\n#' @return  two data tables, the first one head data, which contains the location and SA info.\n#'                           the second one is purified tree data, which contains inividual tree infor.\n#'                           for the tree data, all trees are alive.\n#'                      \n#'\n#' @note no note\n#'\n#' @seealso no\n#'\n#' @include \n#' @export\n#' @docType methods\n#' @rdname dataPurification_MBPSP\n#'\n#' @author Yong Luo\n#'\n#' @examples\n#' \\dontrun{\n#' \n#' }\nsetGeneric(\"dataPurification_MBPSP\", function(MBPSPDataRaw) {\n  standardGeneric(\"dataPurification_MBPSP\")\n})\n#' @export\n#' @rdname dataPurification_MBPSP\nsetMethod(\n  \"dataPurification_MBPSP\",\n  signature = c(MBPSPDataRaw = \"data.table\"),\n  definition = function(MBPSPDataRaw) {\n    dbh <- grep(\"DBH\",   names(MBPSPDataRaw))\n    height <- grep(\"HGT\",   names(MBPSPDataRaw))\n    status <- grep(\"STATUS\",   names(MBPSPDataRaw))\n    dominance <- grep(\"CLASS\",   names(MBPSPDataRaw))\n    age <- grep(\"AGE\",   names(MBPSPDataRaw))\n    measyear <- grep(\"YEARMEA\",   names(MBPSPDataRaw))\n    plotsize <- grep(\"PLOTSIZE\",   names(MBPSPDataRaw))\n    mincut <- min(dbh, height, status, dominance, age, measyear, plotsize)\n    \n    treeData <- MBPSPDataRaw[0,1:24, with = FALSE]\n    names(treeData)[18:24] <- c(\"DBH\", \"Height\", \"Status\",\n                                             \"Class\", \"Age\", \"Measureyear\",\n                                             \"Plotsize\")\n    for(i in 1:length(dbh)){\n      treeDataAdd <- MBPSPDataRaw[,c(1:17, dbh[i], height[i], status[i],\n                                     dominance[i], age[i], measyear[i], plotsize[i]), with = FALSE]\n      names(treeDataAdd)[18:24] <- c(\"DBH\", \"Height\", \"Status\",\n                                     \"Class\", \"Age\", \"Measureyear\",\n                                     \"Plotsize\")\n      treeData <- rbind(treeData, treeDataAdd)\n      rm(treeDataAdd)\n    }\n    treeData <- treeData[!is.na(DBH),]\n\n    \n    headData <- treeData[!is.na(Age) & (Class == 1 | Class == 2),]\n    headData[,baseYear:=min(Measureyear), by = PLOTID]\n    headData[,baseSA:= as.integer(mean(Age-(Measureyear-baseYear))), by = PLOTID]\n    headData <- unique(headData, by  = \"PLOTID\")\n    headData <- headData[STANDTYPE == \"NAT\",][,.(PLOTID, EASTING, NORTHING, \n                                                 Plotsize, baseYear, baseSA)]\n    setnames(headData, c(\"EASTING\", \"NORTHING\"),\n             c(\"Easting\", \"Northing\"))\n    treeData <- treeData[PLOTID %in% headData$PLOTID,]\n    treeData <- treeData[Status == 0 | Status == 1 | Status == 2,][\n      ,.(PLOTID, TREENO, SPECIES, DBH, Height, Measureyear)]\n    setnames(treeData, c(\"TREENO\", \"SPECIES\"), c(\"Treenumber\", \"Species\"))\n    return(list(headData = headData,\n                treeData = treeData))\n  })\n",
+    "created" : 1461392349064.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3158578481",
+    "id" : "DEC6882F",
+    "lastKnownWriteTime" : 1461399224,
+    "path" : "~/GitHub/landwebNRV/landwebNRV/R/dataPurification_MBPSP.R",
+    "project_path" : "R/dataPurification_MBPSP.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
