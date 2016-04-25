@@ -36,19 +36,24 @@ setMethod(
   "dataPurification_MBTSP",
   signature = c(MBTSPDataRaw = "data.table"),
   definition = function(MBTSPDataRaw) {
-    rm(list=ls())
-    setwd("C:/Users/Yong Luo/Documents/PSPs/Data/Data/MB")
-    MBTSPDataRaw <- read.csv("MB_TSP_Highrock.csv",
-                             header = TRUE,
-                             stringsAsFactors = FALSE) %>%
-      data.table
     # get SA information using dominant and codominant trees
     MBTSPDataRaw <- MBTSPDataRaw[,Nofplot:=length(unique(PLOTNO)), by = TILE]
     
     headData <- MBTSPDataRaw[!is.na(AGE_BH) & (CC == "D" | CC == "C"),]
     headData <- headData[, SA:=as.integer(mean(AGE_BH))+8, by = TILE]
     headData[, Plotsize:=0.02*Nofplot]
-    headData <- headData[,.(TILE, )]
+    headData <- headData[,.(TILE, YEAR, EASTING, NORTHING, SA, Plotsize)]
+    headData <- headData[!is.na(EASTING) & !is.na(NORTHING),]
+    headData <- unique(headData, by = "TILE")
+    setnames(headData, c("YEAR", "EASTING", "NORTHING"),
+             c("Year", "Easting", "Northing"))
+    
+    treeData <- MBTSPDataRaw[TILE %in% unique(headData$TILE),][
+      ,.(TILE, TREENO, SPP, DBH, HT, COND)]
+    treeData <- treeData[!is.na(COND) | COND != 10,][,COND:=NULL]
+    setnames(treeData, c("TILE", "TREENO", "SPP", "HT"),
+             c("PlotID", "Treenumber", "Species", "Height"))
+    setnames(headData, "TILE", "PlotID")
     return(list(headData = headData,
                 treeData = treeData))
   })
