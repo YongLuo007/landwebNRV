@@ -128,3 +128,24 @@ MBPSPDataRaw <- read.csv("MBPSP_2012_file1.csv",
 MBdata <- dataPurification_MBPSP(MBPSPDataRaw = MBPSPDataRaw)
 
 
+
+rm(list=ls())
+setwd("C:/Users/Yong Luo/Documents/PSPs/Data/Data/MB")
+MBTSPDataRaw <- read.csv("MB_TSP_Highrock.csv",
+                         header = TRUE,
+                         stringsAsFactors = FALSE) %>%
+  data.table
+source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_MBTSP.R')
+
+dd <- dataPurification_MBTSP(MBTSPDataRaw)
+
+
+MBTSPDataRaw <- read.csv("MB_TSP_FML1.csv",
+                         header = TRUE,
+                         stringsAsFactors = FALSE) %>%
+  data.table
+dd <- dataPurification_MBTSP(MBTSPDataRaw)
+
+
+ 
+
