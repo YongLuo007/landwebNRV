@@ -47,32 +47,37 @@ setMethod(
     
     treeData <- MBPSPDataRaw[0,1:24, with = FALSE]
     names(treeData)[18:24] <- c("DBH", "Height", "Status",
-                                             "Class", "Age", "Measureyear",
-                                             "Plotsize")
+                                             "Class", "Age", "MeasureYear",
+                                             "PlotSize")
     for(i in 1:length(dbh)){
       treeDataAdd <- MBPSPDataRaw[,c(1:17, dbh[i], height[i], status[i],
                                      dominance[i], age[i], measyear[i], plotsize[i]), with = FALSE]
       names(treeDataAdd)[18:24] <- c("DBH", "Height", "Status",
-                                     "Class", "Age", "Measureyear",
-                                     "Plotsize")
+                                     "Class", "Age", "MeasureYear",
+                                     "PlotSize")
       treeData <- rbind(treeData, treeDataAdd)
       rm(treeDataAdd)
     }
     treeData <- treeData[!is.na(DBH),]
-
-    
     headData <- treeData[!is.na(Age) & (Class == 1 | Class == 2),]
-    headData[,baseYear:=min(Measureyear), by = PLOTID]
-    headData[,baseSA:= as.integer(mean(Age-(Measureyear-baseYear))), by = PLOTID]
+    headData[,baseYear:=min(MeasureYear), by = PLOTID]
+    headData[,baseSA:= as.integer(mean(Age-(MeasureYear-baseYear))), by = PLOTID]
     headData <- unique(headData, by  = "PLOTID")
     headData <- headData[STANDTYPE == "NAT",][,.(PLOTID, EASTING, NORTHING, 
-                                                 Plotsize, baseYear, baseSA)]
+                                                 PlotSize, baseYear, baseSA)]
     setnames(headData, c("EASTING", "NORTHING"),
              c("Easting", "Northing"))
     treeData <- treeData[PLOTID %in% headData$PLOTID,]
     treeData <- treeData[Status == 0 | Status == 1 | Status == 2,][
-      ,.(PLOTID, TREENO, SPECIES, DBH, Height, Measureyear)]
-    setnames(treeData, c("TREENO", "SPECIES"), c("Treenumber", "Species"))
-    return(list(headData = headData,
+      ,.(PLOTID, TREENO, SPECIES, DBH, Height, MeasureYear)]
+    setnames(treeData, c("TREENO", "SPECIES"), c("TreeNumber", "Species"))
+    
+    measureidtable <- unique(treeData[,.(PLOTID, MeasureYear)], by = c("PLOTID", "MeasureYear"))
+    measureidtable[, MeasureID:=as.numeric(row.names(measureidtable))]
+    measureidtable <- measureidtable[,.(MeasureID, PLOTID, MeasureYear)]
+    headData <- setkey(measureidtable, PLOTID)[setkey(headData, PLOTID), nomatch = 0]
+    treeData <- setkey(measureidtable, PLOTID, MeasureYear)[setkey(treeData, PLOTID, MeasureYear),
+                                                            nomatch = 0]
+    return(list(plotHeaderData = headData,
                 treeData = treeData))
   })

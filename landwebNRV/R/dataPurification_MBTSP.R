@@ -41,8 +41,8 @@ setMethod(
     
     headData <- MBTSPDataRaw[!is.na(AGE_BH) & (CC == "D" | CC == "C"),]
     headData <- headData[, SA:=as.integer(mean(AGE_BH))+8, by = TILE]
-    headData[, Plotsize:=0.02*Nofplot]
-    headData <- headData[,.(TILE, YEAR, EASTING, NORTHING, SA, Plotsize)]
+    headData[, PlotSize:=0.02*Nofplot]
+    headData <- headData[,.(TILE, YEAR, EASTING, NORTHING, SA, PlotSize)]
     headData <- headData[!is.na(EASTING) & !is.na(NORTHING),]
     headData <- unique(headData, by = "TILE")
     setnames(headData, c("YEAR", "EASTING", "NORTHING"),
@@ -52,8 +52,8 @@ setMethod(
       ,.(TILE, TREENO, SPP, DBH, HT, COND)]
     treeData <- treeData[!is.na(COND) | COND != 10,][,COND:=NULL]
     setnames(treeData, c("TILE", "TREENO", "SPP", "HT"),
-             c("PlotID", "Treenumber", "Species", "Height"))
+             c("PlotID", "TreeNumber", "Species", "Height"))
     setnames(headData, "TILE", "PlotID")
-    return(list(headData = headData,
+    return(list(plotHeaderData = headData,
                 treeData = treeData))
   })

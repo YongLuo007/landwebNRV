@@ -5,7 +5,7 @@
 #' @param sampleTreeRaw  data table, is age_samples in the MS access file
 #' 
 #' 
-#' @param plotHeadRaw data.table, is plot_header in MS access file
+#' @param plotHeaderRaw data.table, is plot_header in MS access file
 #' 
 #'        
 #' @param treeDataRaw data.table, is trees in MS access file
@@ -22,7 +22,7 @@
 #' @include 
 #' @export
 #' @docType methods
-#' @rdname dataPurification_SKTSP
+#' @rdname dataPurification_SKTSP_PPPA
 #'
 #' @author Yong Luo
 #'
@@ -30,41 +30,48 @@
 #' \dontrun{
 #' 
 #' }
-setGeneric("dataPurification_SKTSP", function(sampleTreeRaw, plotHeadRaw,
+setGeneric("dataPurification_SKTSP_PPPA", function(sampleTreeRaw, plotHeaderRaw,
                                               treeDataRaw) {
-  standardGeneric("dataPurification_SKTSP")
+  standardGeneric("dataPurification_SKTSP_PPPA")
 })
 #' @export
-#' @rdname dataPurification_SKTSP
+#' @rdname dataPurification_SKTSP_PPPA
 setMethod(
-  "dataPurification_SKTSP",
+  "dataPurification_SKTSP_PPPA",
   signature = c(sampleTreeRaw = "data.table", 
-                plotHeadRaw = "data.table",
+                plotHeaderRaw = "data.table",
                 treeDataRaw = "data.table"),
-  definition = function(sampleTreeRaw, plotHeadRaw,
+  definition = function(sampleTreeRaw, plotHeaderRaw,
                         treeDataRaw) {
+    rm(list=ls())
+    setwd("~/LandWeb/Data/SK")
+    load("SKTSP_PAPP.RData")
+    sampleTreeRaw <- PPsampletree
+    plotHeaderRaw <- PPplotheader
+    treeDataRaw <- PPtreedata
+    
     options(scipen = 999) # avoid scientific notation
     # calculate SA from sample tree data for each plot
     # get dominant and codominant trees
     sampleTreeRaw <- sampleTreeRaw[CROWN_CL == 1 | CROWN_CL == 2,]
     sampleTreeRaw <- sampleTreeRaw[!is.na(TOT_AGE),][, SA:=0]
     plotids <- unique(sampleTreeRaw$PLOT_NUM)
-    headData_SA <- sampleTreeRaw[0,][,PlotID:=0]
+    headData_SA <- sampleTreeRaw[0,][,MeasureID:=NA]
     k <- 1
     for(plotid in plotids){
       tempSA <- as.integer(mean(sampleTreeRaw[PLOT_NUM %==% plotid, ]$TOT_AGE))
       headData_SAoutput <- sampleTreeRaw[PLOT_NUM %==% plotid,][, SA:=tempSA]
-      headData_SAoutput <- headData_SAoutput[1,][, PlotID:=k]
+      headData_SAoutput <- headData_SAoutput[1,][, MeasureID:=paste("SKTSP_PPPA_", k, sep = "")]
       k <- k+1
       headData_SA <- rbind(headData_SA, headData_SAoutput)
       rm(tempSA, headData_SAoutput)
     }
     # to avoid floating point problem
-    headData_SA <- headData_SA[,.(PlotID, PLOT_NUM, SA)]
+    headData_SA <- headData_SA[,.(MeasureID, PLOT_NUM, SA)]
     rm(k, plotid, plotids)
     
 
-    plotHeadRawtemp <- plotHeadRaw[!is.na(M_AREA),.(PLOT_NUM, GPS_ZONE, PLOT,
+    plotHeadRawtemp <- plotHeaderRaw[!is.na(M_AREA),.(PLOT_NUM, GPS_ZONE, PLOT,
                                                         GPS_EASTING, GPS_NORTHING,
                                                         CR_YEAR, M_AREA)][
       !is.na(GPS_ZONE),][
@@ -72,7 +79,7 @@ setMethod(
         !is.na(GPS_NORTHING),]
     
     plotids <- unique(headData_SA$PLOT_NUM)
-    headData <- plotHeadRawtemp[0, ][, ':='(PLOT = NULL, SA = 0, PlotID = 0)]
+    headData <- plotHeadRawtemp[0, ][, ':='(PLOT = NULL, SA = 0, MeasureID = 0)]
     for(plotid in plotids){
       subheadData_PSLocaAdd <- plotHeadRawtemp[PLOT_NUM %==% plotid,]
       if(nrow(subheadData_PSLocaAdd)>0){
@@ -83,14 +90,14 @@ setMethod(
                                                              M_AREA = sum(M_AREA))]
         subheadData_PSLocaAdd <- subheadData_PSLocaAdd[1,][, ':='(PLOT = NULL,
                                                                   SA = headData_SA[PLOT_NUM %==% plotid,]$SA,
-                                                                  PlotID = headData_SA[PLOT_NUM %==% plotid,]$PlotID)]
+                                                                  MeasureID = headData_SA[PLOT_NUM %==% plotid,]$MeasureID)]
         headData <- rbind(headData, subheadData_PSLocaAdd)
       }
       rm(subheadData_PSLocaAdd)
     }
     rm(plotid, plotids)
     setnames(headData, c("GPS_ZONE", "GPS_EASTING", "GPS_NORTHING", "CR_YEAR", "M_AREA"),
-             c("Zone", "Easting", "Northing", "Year", "Plotsize"))
+             c("Zone", "Easting", "Northing", "MeasureYear", "PlotSize"))
     
     
     # for tree data
@@ -105,18 +112,24 @@ setMethod(
     set(treeDataRawtemp, ,c("CONCODE1", "CONCODE2", "CONCODE3", "CONCODE4", "CONCODE5", "CONCODE6"),
         NULL)
     plotids <- unique(headData$PLOT_NUM)
-    treeData <- treeDataRawtemp[0,][,PlotID:=0]
+    treeData <- treeDataRawtemp[0,][,MeasureID:=0]
     for(plotid in plotids){
       treeDataAdded <- treeDataRawtemp[PLOT_NUM %==% plotid, ]
       if(nrow(treeDataAdded)>0){
-        treeDataAdded <- treeDataAdded[ , PlotID:=headData[PLOT_NUM %==% plotid,]$PlotID]
+        treeDataAdded <- treeDataAdded[ , MeasureID:=headData[PLOT_NUM %==% plotid,]$MeasureID]
         treeData <- rbind(treeData, treeDataAdded)
       }
       rm(treeDataAdded)
     }
     setnames(treeData, c("TREE_NO", "SPECIES",  "TOT_HT"),
-             c("Treenumber", "Species", "Height"))
-    
-    headData <- headData[PlotID %in% unique(treeData$PlotID),]
-    return(list(treeData = treeData, headData = headData))
+             c("TreeNumber", "Species", "Height"))
+    headData <- headData[MeasureID %in% unique(treeData$MeasureID),]
+    headData <- headData[,.(MeasureID, OrigPlotID1 = PLOT_NUM, MeasureYear, Longitude = NA,
+                            Latitude = NA, Zone, Easting, Northing, PlotSize, baseYear = MeasureYear,
+                            baseSA = SA)]
+    treeData <- setkey(treeData, MeasureID)[setkey(headData[,.(MeasureID, MeasureYear)], MeasureID),
+                                            nomatch = 0]
+    treeData <- treeData[,.(MeasureID, OrigPlotID1 = PLOT_NUM, OrigPlotID2 = NA, MeasureYear,
+                            TreeNumber, Species,  DBH, Height)]
+    return(list(plotHeaderData = headData, treeData = treeData))
   })

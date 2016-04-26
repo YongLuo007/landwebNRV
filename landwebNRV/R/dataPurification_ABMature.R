@@ -111,13 +111,21 @@ setMethod(
         plotsize <- as.numeric(headerData[GroupNumber == groupnumber,]$PlotSize) # obtain plot size from headData
         treeData[MeasureID == plotid, Treeplotsize := plotsize]
       }
-    }
+    } 
     
     setnames(treeData, "Treeplotsize", "PlotSize")
     measureiddata <- setkey(unique(treeData[,.(MeasureID, GroupNumber, PlotSize, MeasureYear)], by = "MeasureID"), GroupNumber)
     headerData[, PlotSize := NULL]
     headerData <- measureiddata[setkey(headerData, GroupNumber), nomatch  = 0][,Longitude := -(Longitude)]
     treeData[,':='(DBH = DBH/10, PlotSize = NULL, plotsizetime = NULL)]
+    headerData[,MeasureID:=paste("ABPSPMature_", MeasureID, sep = "")]
+    setnames(headerData, "GroupNumber", "OrigPlotID1")
+    headerData <- headerData[,.(MeasureID, OrigPlotID1, MeasureYear, Longitude,
+                                Latitude, Zone = NA, Easting, Northing, PlotSize, baseYear,
+                                baseSA)]
+    treeData[,MeasureID:=paste("ABPSPMature_", MeasureID, sep = "")]
+    setnames(treeData, c("GroupNumber", "PlotNumber"), 
+             c("OrigPlotID1", "OrigPlotID2"))
     return(list(plotHeaderData = headerData,
                 treeData = treeData))
   })

@@ -2,10 +2,10 @@
 #' purify SK TSP data from Mistic.
 #' 
 #' 
-#' @param compiledPlotData  data table, is age_samples in the MS access file
+#' @param compiledPlotData  data table, 
 #' 
 #' 
-#' @param compiledTreeData data.table, is plot_header in MS access file
+#' @param compiledTreeData data.table,
 #' 
 #'        
 #' @return  two data tables, the first one head data, which contains the location and SA info.
@@ -65,5 +65,5 @@ setMethod(
     setnames(treeData, c("TREENO", "SPECIES", "HEIGHT"),
              c("Treenumber", "Species", "Height"))
     
-    return(list(treeData = treeData, headData = headData))
+    return(list(plotHeaderData = headData, treeData = treeData))
   })

@@ -2,22 +2,12 @@
 #' purify NFI PSP data
 #' 
 #' 
-#' @param lgtreeRaw  data table, which is the raw tree data from DAT file, recordType == 2
-#'                  treeData can be obtained using obtainTreeDataAB function
+#' @param lgptreeRaw  data table, which is the raw tree data in the large tree plot, i.e., ltp_tree.csv
 #'                  
 #'                  
-#' @param lgtreeHeadRaw  data table, which is the raw tree data from DAT file, recordType == 2
-#'                  treeData can be obtained using obtainTreeDataAB function
+#' @param lgpHeaderRaw  data table, which is the large plot header data, i.e., ltp_header.csv 
 #'
-#' @param standOrigin  data table, which is the raw tree data from DAT file, recordType == 2
-#'                  treeData can be obtained using obtainTreeDataAB function
-#'                  
-#' @param lgtreeRaw  data table, which is the raw tree data from DAT file, recordType == 2
-#'                  treeData can be obtained using obtainTreeDataAB function
-#'                  
-#' @param lgtreeAge  data table, which is the raw tree data from DAT file, recordType == 2
-#'                  treeData can be obtained using obtainTreeDataAB function
-
+#' @param approxLocation  data table, which is approximate locations of the plots, ie., climate_approx_loc.csv.                                     
 #'
 #' @return  two data tables, the first one head data, which contains the location and SA info.
 #'                           the second one is purified tree data, which contains inividual tree infor.
@@ -39,33 +29,35 @@
 #' \dontrun{
 #' 
 #' }
-setGeneric("dataPurification_NFIPSP", function(MBTSPDataRaw) {
+setGeneric("dataPurification_NFIPSP", function(lgptreeRaw,
+                                               lgpHeaderRaw,
+                                               approxLocation) {
   standardGeneric("dataPurification_NFIPSP")
 })
 #' @export
 #' @rdname dataPurification_NFIPSP
 setMethod(
   "dataPurification_NFIPSP",
-  signature = c(MBTSPDataRaw = "data.table"),
-  definition = function(MBTSPDataRaw) {
-    # get SA information using dominant and codominant trees
-    MBTSPDataRaw <- MBTSPDataRaw[,Nofplot:=length(unique(PLOTNO)), by = TILE]
-    
-    headData <- MBTSPDataRaw[!is.na(AGE_BH) & (CC == "D" | CC == "C"),]
-    headData <- headData[, SA:=as.integer(mean(AGE_BH))+8, by = TILE]
-    headData[, Plotsize:=0.02*Nofplot]
-    headData <- headData[,.(TILE, YEAR, EASTING, NORTHING, SA, Plotsize)]
-    headData <- headData[!is.na(EASTING) & !is.na(NORTHING),]
-    headData <- unique(headData, by = "TILE")
-    setnames(headData, c("YEAR", "EASTING", "NORTHING"),
-             c("Year", "Easting", "Northing"))
-    
-    treeData <- MBTSPDataRaw[TILE %in% unique(headData$TILE),][
-      ,.(TILE, TREENO, SPP, DBH, HT, COND)]
-    treeData <- treeData[!is.na(COND) | COND != 10,][,COND:=NULL]
-    setnames(treeData, c("TILE", "TREENO", "SPP", "HT"),
-             c("PlotID", "Treenumber", "Species", "Height"))
-    setnames(headData, "TILE", "PlotID")
-    return(list(headData = headData,
+  signature = c(lgptreeRaw = "data.table",
+                lgpHeaderRaw = "data.table",
+                approxLocation = "data.table"),
+  definition = function(lgptreeRaw,
+                        lgpHeaderRaw,
+                        approxLocation) {
+    # start from tree data to obtain plot infor
+    lgptreeRaw[, year:=as.numeric(substr(lgptreeRaw$meas_date, 1, 4))]
+    lgpHeaderRaw[, year:=as.numeric(substr(lgpHeaderRaw$meas_date, 1, 4))]
+    lgpHeaderRaw <- lgpHeaderRaw[nfi_plot %in% unique(lgptreeRaw$nfi_plot),][
+      ,.(nfi_plot, year, meas_plot_size, site_age)]
+    approxLocation <- approxLocation[,.(nfi_plot, longitude, latitude, elevation)] %>%
+      unique(, by = "nfi_plot")
+    lgpHeaderRaw <- setkey(lgpHeaderRaw, nfi_plot)[setkey(approxLocation, nfi_plot), nomatch = 0]
+    treeData <- lgptreeRaw[,.(nfi_plot, year, tree_num, lgtree_genus, lgtree_species, 
+                                lgtree_status, dbh, height)][nfi_plot %in% unique(lgpHeaderRaw$nfi_plot),]
+    treeData <- treeData[lgtree_status != "DS" & lgtree_status != "M",][, lgtree_status:=NULL]
+    setnames(treeData, c("nfi_plot", "year", "tree_num", "lgtree_genus", "lgtree_species", "dbh", "height"),
+             c("PlotID", "MeasureYear", "treeNumber", "Genus", "Species", "DBH", "Height"))
+    names(lgpHeaderRaw) <- c("PlotID", "MeasureYear", "PlotSize", "SA", "Longitude", "Latitude", "Elevation")
+    return(list(plotHeaderData = lgpHeaderRaw,
                 treeData = treeData))
   })

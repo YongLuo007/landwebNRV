@@ -5,9 +5,9 @@
 #' @param SADataRaw  data table, is age_samples in the MS access file
 #' 
 #' 
-#' @param plotHeadRaw data.table, is plot_header in MS access file
+#' @param plotHeaderRaw data.table, is plot_header in MS access file
 #' 
-#' @param measureHeadRaw data.table, is mearsurement_header in MS access file
+#' @param measureHeaderRaw data.table, is mearsurement_header in MS access file
 #'        
 #' @param treeDataRaw data.table, is trees in MS access file
 #'
@@ -31,8 +31,8 @@
 #' \dontrun{
 #' 
 #' }
-setGeneric("dataPurification_SKPSP", function(SADataRaw, plotHeadRaw,
-                                              measureHeadRaw, treeDataRaw) {
+setGeneric("dataPurification_SKPSP", function(SADataRaw, plotHeaderRaw,
+                                              measureHeaderRaw, treeDataRaw) {
   standardGeneric("dataPurification_SKPSP")
 })
 #' @export
@@ -40,46 +40,47 @@ setGeneric("dataPurification_SKPSP", function(SADataRaw, plotHeadRaw,
 setMethod(
   "dataPurification_SKPSP",
   signature = c(SADataRaw = "data.table", 
-                plotHeadRaw = "data.table",
-                measureHeadRaw = "data.table",
+                plotHeaderRaw = "data.table",
+                measureHeaderRaw = "data.table",
                 treeDataRaw = "data.table"),
-  definition = function(SADataRaw, plotHeadRaw,
-                        measureHeadRaw, treeDataRaw) {
+  definition = function(SADataRaw, plotHeaderRaw,
+                        measureHeaderRaw, treeDataRaw) {
     # range(SADataRaw$COUNTED_AGE) # NA NA
     # range(SADataRaw$TOTAL_AGE) # NA NA
     # unique(SADataRaw$TREE_STATUS)
-    SADataRaw <- SADataRaw[!is.na(TOTAL_AGE) & TREE_STATUS == 1,]
-    SADataRaw[, baseYear := min(YEAR), by = PLOT_ID]
-    SADataRaw[, treeAge := TOTAL_AGE-(YEAR-baseYear)]
-    SADataRawDomSA <- SADataRaw[CROWN_CLASS == 1,] # the stand age first determined by dominant trees
-    SADataRawDomSA[, NofTrees:=length(CROWN_CLASS), by  = PLOT_ID]
+    header_SA <- SADataRaw[!is.na(TOTAL_AGE) & TREE_STATUS == 1,]
+    header_SA[, baseYear := min(YEAR), by = PLOT_ID]
+    header_SA[, treeAge := TOTAL_AGE-(YEAR-baseYear)]
+    header_SA_Dom <- header_SA[CROWN_CLASS == 1,] # the stand age first determined by dominant trees
+    header_SA_Dom[, NofTrees:=length(CROWN_CLASS), by  = PLOT_ID]
     # unique(SADataRawDomSA$NofTrees) # 1 2 3 4 5
     # stand age must determined by using at least 2 trees
-    SADataRawDomSA <- SADataRawDomSA[NofTrees != 1,]
+    header_SA_Dom <- header_SA_Dom[NofTrees != 1,]
     # SADataRawDomSA[, treeAgeDif:=max(treeAge)-min(treeAge), by = PLOT_ID]
     # range(SADataRawDomSA$treeAgeDif) # 0 44
     # mean(SADataRawDomSA$treeAgeDif) # 7.03
-    SADataRawDomSA[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
-    SADataRawDomSA <- unique(SADataRawDomSA[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID")
+    header_SA_Dom[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
+    header_SA_Dom <- unique(header_SA_Dom[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID")
     # for the other plots determine SA using codominant trees
-    SADataRawCodomSA <- SADataRaw[CROWN_CLASS == 2,]
+    header_SA_CoDom <- header_SA[CROWN_CLASS == 2,]
     
-    SADataRawCodomSA <- SADataRawCodomSA[!(PLOT_ID %in% unique(SADataRawDomSA$PLOT_ID)),]
-    SADataRawCodomSA[, NofTrees:=length(CROWN_CLASS), by  = PLOT_ID]
+    header_SA_CoDom <- header_SA_CoDom[!(PLOT_ID %in% unique(header_SA_Dom$PLOT_ID)),]
+    header_SA_CoDom[, NofTrees:=length(CROWN_CLASS), by  = PLOT_ID]
     # unique(SADataRawCodomSA$NofTrees)
-    SADataRawCodomSA <- SADataRawCodomSA[NofTrees != 1,]
-    SADataRawCodomSA[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
-    SADataRawCodomSA <- unique(SADataRawCodomSA[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID") 
-    headData_SA <- rbind(SADataRawDomSA, SADataRawCodomSA)
-    headData_loca <- plotHeadRaw[PLOT_ID %in% unique(headData_SA$PLOT_ID),][
+    header_SA_CoDom <- header_SA_CoDom[NofTrees != 1,]
+    header_SA_CoDom[, baseSA:=as.integer(mean(treeAge)), by = PLOT_ID]
+    header_SA_CoDom <- unique(header_SA_CoDom[,.(PLOT_ID, baseYear, baseSA)], by = "PLOT_ID") 
+    headData_SA <- rbind(header_SA_Dom, header_SA_CoDom)
+    
+    headData_loca <- plotHeaderRaw[PLOT_ID %in% unique(headData_SA$PLOT_ID),][
       ,.(PLOT_ID, Z13nad83_e, Z13nad83_n, Zone = 13)]
     names(headData_loca)[2:3] <- c("Easting", "Northing")
     headData_SALoca <- setkey(headData_SA, PLOT_ID)[setkey(headData_loca, PLOT_ID),
                                                     nomatch = 0]
-    headData_PS <- measureHeadRaw[PLOT_ID %in% unique(headData_SALoca$PLOT_ID),][
+    headData_PS <- measureHeaderRaw[PLOT_ID %in% unique(headData_SALoca$PLOT_ID),][
       ,.(PLOT_ID, PLOT_SIZE)][!is.na(PLOT_SIZE),]
     headData_PS <- unique(headData_PS, by = "PLOT_ID")
-    setnames(headData_PS, "PLOT_SIZE", "Plotsize")
+    setnames(headData_PS, "PLOT_SIZE", "PlotSize")
     headData <- headData_SALoca[setkey(headData_PS, PLOT_ID), nomatch = 0]
     
     
@@ -99,10 +100,10 @@ setMethod(
     #     7 7 Decomposed snag.
     #     8 8 Down snag
     #     9 9 Stump
-    treeDataRaw <- treeDataRaw[is.na(TREE_STATUS) | # conservtively
-                                 TREE_STATUS == 0 |
-                                 TREE_STATUS == 1 |
-                                 TREE_STATUS == 2,]
+    treeData <- treeDataRaw[is.na(TREE_STATUS) | # conservtively
+                              TREE_STATUS == 0 |
+                              TREE_STATUS == 1 |
+                              TREE_STATUS == 2,]
     # 2. by mortality codes
     #     Null 0
     #     Natural or Undetermined 1
@@ -113,14 +114,26 @@ setMethod(
     #     Snow 6
     #     Other Trees 7
     #     Hail or Ice Storm 8
-    treeDataRaw <- treeDataRaw[MORTALITY == 0 |
-                                 is.na(MORTALITY),]
+    treeData <- treeData[MORTALITY == 0 |
+                           is.na(MORTALITY),]
     # check the trees with both status and mortality are NA
     # unique(treeDataRaw[is.na(TREE_STATUS) & is.na(MORTALITY), ]$CONDITIONCODE1)
     # NULL
-    treeDataRaw <- treeDataRaw[,.(PLOT_ID, TREE_NO, YEAR, SPECIES,  DBH, HEIGHT)]
-    names(treeDataRaw) <- c("PlotID", "Treenumber", "Measureyear", "Species",
+    treeData <- treeData[,.(PLOT_ID, OrigPlotID2 = NA, YEAR, TREE_NO, SPECIES,  DBH, HEIGHT)]
+    names(treeData) <- c("OrigPlotID1", "OrigPlotID2", "MeasureYear", "TreeNumber", "Species",
                             "DBH", "Height")
-    setnames(headData, "PLOT_ID", "PlotID")
-    return(list(treeData = treeDataRaw, headData = headData))
+    setnames(headData, "PLOT_ID", "OrigPlotID1")
+    measureidtable <- unique(treeData[,.(OrigPlotID1, MeasureYear)], by = c("OrigPlotID1", "MeasureYear"))
+    measureidtable[,MeasureID:=paste("SKPSP_", row.names(measureidtable), sep = "")]
+    measureidtable <- measureidtable[,.(MeasureID, OrigPlotID1, MeasureYear)]
+    treeData <- setkey(measureidtable, OrigPlotID1, MeasureYear)[setkey(treeData, OrigPlotID1, MeasureYear),
+                                                            nomatch = 0]
+    treeData <- treeData[,.(MeasureID, OrigPlotID1, OrigPlotID2, MeasureYear,
+                            TreeNumber, Species,  DBH, Height)]
+    headData <- setkey(measureidtable, OrigPlotID1)[setkey(headData, OrigPlotID1),
+                                               nomatch = 0]
+    headData <- headData[,.(MeasureID, OrigPlotID1, MeasureYear, Longitude = NA,
+                                Latitude = NA, Zone, Easting, Northing, PlotSize, baseYear,
+                                baseSA)]
+    return(list(plotHeaderData = headData, treeData = treeData))
   })
