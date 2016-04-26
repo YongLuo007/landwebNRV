@@ -1,0 +1,17 @@
+{
+    "contents" : "rm(list=ls())\ntreedataraw <- read.csv(\"C:/Users/yonluo/Documents/LandWeb/Data/AB/ABMatureTreeData.csv\",\n                        header = TRUE,\n                        stringsAsFactor = FALSE) %>%\n  data.table\nheaddataraw <- read.csv(\"C:/Users/yonluo/Documents/LandWeb/Data/AB/plotLocation.csv\",\n                        header = TRUE,\n                        stringsAsFactor = FALSE) %>%\n  data.table\nsource('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_ABMature.R')\noutput <- dataPurification_ABMature(treeDataRaw = treedataraw, plotHeaderDataRaw = headdataraw)\ntreeData <- output$treeData\nplotHeaderData <- output$plotHeaderData\n\n\nsource('~/GitHub/landwebNRV/landwebNRV/R/standardizeSpeciesName.R')\n\ntreeData1 <- standardizeSpeciesName(speciesTable = treeData, forestInventorySource = \"ABPSP\")\n# check the species is unknown\nlength(which(treeData1$newSpeciesName == \"unknown\")) # 0\n\nsource('~/GitHub/landwebNRV/landwebNRV/R/biomassCalculation.R')\n\ntreeData1[, Biomass:=biomassCalculation(species = newSpeciesName, DBH = DBH)$biomass]\n# check the trees that biomass is calculated for\n\nunique(treeData1[Biomass==0,]$newSpeciesName)\n# \"limber pine\"  \"whitebark pine\"\n\n# for these species, using softwood biomass equation\ntreeData1[newSpeciesName == \"limber pine\" | newSpeciesName == \"whitebark pine\", newSpeciesName:=\"softwood\"]\n\ntreeData1[, Biomass:=biomassCalculation(species = newSpeciesName, DBH = DBH)$biomass]\nunique(treeData1[Biomass==0,]$newSpeciesName)\n\ntreeData1[,TotalBiomass:=sum(Biomass), by = MeasureID]\ntreeData1 <- treeData1[,TotalBiomassBySpp:=sum(Biomass),\n                       by = c(\"MeasureID\", \"newSpeciesName\")] %>%\n  unique(., by = c(\"MeasureID\", \"newSpeciesName\"))\n\n\n",
+    "created" : 1461624681479.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "4263984195",
+    "id" : "F38E2B81",
+    "lastKnownWriteTime" : 1461624664,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
