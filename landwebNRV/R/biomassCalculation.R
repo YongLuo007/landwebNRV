@@ -329,7 +329,7 @@ setMethod(
                           foliage1*DBH^foliage2+
                           branches1*DBH^branches2]
         } else if (individualSpecies == "lodgepole pine"){
-          if(paperSource == Lambert2005){
+          if(paperSource == "Lambert2005"){
             wood1 <- 0.0475
             wood2 <- 2.5437
             bark1 <- 0.0186
