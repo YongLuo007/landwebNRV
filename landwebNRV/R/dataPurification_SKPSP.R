@@ -119,6 +119,7 @@ setMethod(
     # check the trees with both status and mortality are NA
     # unique(treeDataRaw[is.na(TREE_STATUS) & is.na(MORTALITY), ]$CONDITIONCODE1)
     # NULL
+    treeData <- treeData[!is.na(DBH) & DBH != 0,]
     treeData <- treeData[,.(PLOT_ID, OrigPlotID2 = NA, YEAR, TREE_NO, SPECIES,  DBH, HEIGHT)]
     names(treeData) <- c("OrigPlotID1", "OrigPlotID2", "MeasureYear", "TreeNumber", "Species",
                             "DBH", "Height")

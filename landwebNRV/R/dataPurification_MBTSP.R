@@ -59,6 +59,9 @@ setMethod(
     treeData <- MBTSPDataRaw[MeasureID %in% unique(headData$MeasureID),][
       ,.(MeasureID, OrigPlotID1, TREENO, SPP, DBH, HT, COND)]
     treeData <- treeData[!is.na(COND) | COND != 10,][,COND:=NULL]
+    treeData <- treeData[SPP != "DD" & SPP != "DC" & SPP != "DU",] # species code for DD is dead deciduous standing
+                                                 # species code for DC is dead coniferous standing
+                                                 # species code for DU is dead unknown standing
     setnames(treeData, c("TREENO", "SPP", "HT"),
              c("TreeNumber", "Species", "Height"))
 

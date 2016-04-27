@@ -142,6 +142,7 @@ setMethod(
       ,.(OrigPlotID1, SPECIES, DBH, CALC_HT, TREE_ALT_KEY, TREE_CL)]
     # the link between treedata and plot data is PLOT_CODE
     treeData <- treeData[TREE_CL != 4, ][, TREE_CL:=NULL]
+    treeData <- treeData[!is.na(DBH) & DBH != 0, ]
     treeData <- setkey(treeData, OrigPlotID1)[setkey(headerdata[,.(MeasureID, OrigPlotID1, MeasureYear)], OrigPlotID1),
                                               nomatch = 0]
     treeData <- treeData[,.(MeasureID, OrigPlotID1, OrigPlotID2 = NA, MeasureYear,

@@ -627,6 +627,20 @@ setMethod(
                           bark1*DBH^bark2+
                           foliage1*DBH^foliage2+
                           branches1*DBH^branches2]
+        } else if (individualSpecies == "white oak"){
+          wood1 <- 0.0762
+          wood2 <- 2.3335
+          bark1 <- 0.0338
+          bark2 <- 1.9845
+          branches1 <- 0.0113
+          branches2 <- 2.6211
+          foliage1 <- 0.0188
+          foliage2 <- 1.7881
+          tempdatatable[species == individualSpecies,
+                        biomass := wood1*DBH^wood2+
+                          bark1*DBH^bark2+
+                          foliage1*DBH^foliage2+
+                          branches1*DBH^branches2]
         } else if (individualSpecies == "white spruce"){
           if(paperSource == "Lambert2005"){
             wood1 <- 0.0359

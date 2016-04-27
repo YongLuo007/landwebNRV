@@ -41,28 +41,31 @@ setMethod(
                 forestInventorySource = "character"),
   definition = function(speciesTable, forestInventorySource) {
     if(forestInventorySource == "MBPSP" | forestInventorySource == "MBTSP"){
+      speciesTable[Species == "AE" | Species == "E" | Species == "WE",
+                   newSpeciesName := "white elm"] # assume WE is white elm in MB PSP
+      speciesTable[Species == "GA", newSpeciesName := "red ash"] # green ash = red ash
       speciesTable[Species == "WP", newSpeciesName := "white pine"]
       speciesTable[Species == "RP", newSpeciesName := "red pine"]
-      speciesTable[Species == "JP", newSpeciesName := "jack pine"]
+      speciesTable[Species == "JP" | Species == "jp", newSpeciesName := "jack pine"]
       speciesTable[Species == "SP", newSpeciesName := "scots pine"]
-      speciesTable[Species == "BS", newSpeciesName := "black spruce"]
-      speciesTable[Species == "WS", newSpeciesName := "white spruce"]
-      speciesTable[Species == "BF", newSpeciesName := "balsam fir"]
-      speciesTable[Species == "TL", newSpeciesName := "tamarack larch"]
+      speciesTable[Species == "BS" | Species == "bs" | Species == " BS",
+                   newSpeciesName := "black spruce"]
+      speciesTable[Species == "WS" | Species == "ws", newSpeciesName := "white spruce"]
+      speciesTable[Species == "BF" | Species == "bf", newSpeciesName := "balsam fir"]
+      speciesTable[Species == "TL" | Species == "tl", newSpeciesName := "tamarack larch"]
       speciesTable[Species == "EC", newSpeciesName := "eastern redcedar"]
       # assume cedar in original document is eastern redcedar
-      speciesTable[Species == "TA", newSpeciesName := "trembling aspen"]
+      speciesTable[Species == "TA" | Species == "ta", newSpeciesName := "trembling aspen"]
       speciesTable[Species == "LA", newSpeciesName := "largetooth aspen"]
-      speciesTable[Species == "BA", newSpeciesName := "balsam poplar"]
+      speciesTable[Species == "BA" | Species == "ba", newSpeciesName := "balsam poplar"]
       speciesTable[Species == "CO", newSpeciesName := "eastern cottonwood"]
       speciesTable[Species == "W", newSpeciesName := "willow"]
-      speciesTable[Species == "WB", newSpeciesName := "white birch"]
-      speciesTable[Species == "B", newSpeciesName := "basswood"]
+      speciesTable[Species == "WB" | Species == "wb", newSpeciesName := "white birch"]
+      speciesTable[Species == "B" | Species == "BW", newSpeciesName := "basswood"]
       speciesTable[Species == "HB", newSpeciesName := "hackberry"]
       speciesTable[Species == "MM", newSpeciesName := "manitoba maple"]
-      speciesTable[Species == "AS", newSpeciesName := "back ash"]
+      speciesTable[Species == "AS", newSpeciesName := "black ash"]
       # assume ash in original document is black ash
-      speciesTable[Species == "E", newSpeciesName := "white elm"]
       speciesTable[Species == "HH", newSpeciesName := "hop-hornbeam"]
       speciesTable[Species == "BO", newSpeciesName := "white oak"]
       # assume bur oak in original document is white oak

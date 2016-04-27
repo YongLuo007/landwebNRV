@@ -1,5 +1,11 @@
 rm(list=ls())
 # workPath <- "H:/LandWeb/Data/AB"
+library(data.table)
+library(dplyr)
+library(rgdal)
+library(sp)
+library(raster)
+library(fpCompare)
 workPath <- "C:/Users/yonluo/Documents/LandWeb/Data/AB"
 treedataraw <- read.csv(file.path(workPath, "ABMatureTreeData.csv"),
                         header = TRUE,
@@ -13,7 +19,7 @@ source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_ABMature.R')
 
 ABPSPoutput <- dataPurification_ABMature(treeDataRaw = treedataraw, plotHeaderDataRaw = headdataraw)
 
-rm(treedataraw, dataPurification_ABMature, headdataraw)
+rm(treedataraw, dataPurification_ABMature, headdataraw, workPath)
 
 
 source('~/GitHub/landwebNRV/landwebNRV/R/dataPurification_BCPSP.R')
