@@ -135,7 +135,7 @@ setMethod(
                                  sep = "")]
     headerdata <- headerdata[,.(MeasureID, OrigPlotID1 = PLOT_CODE, MeasureYear = Year, 
                                 Longitude, Latitude, Zone = ZONE, Easting = EASTING,
-                                Northing = NORTHING, PlotSize = SIZE, baseYear = Year,
+                                Northing = NORTHING, PlotSize = SIZE/10000, baseYear = Year,
                                 baseSA)]
     setnames(treeDataRaw, "PLOT_CODE", "OrigPlotID1")
     treeData <- treeDataRaw[OrigPlotID1 %in% unique(headerdata$OrigPlotID1),][

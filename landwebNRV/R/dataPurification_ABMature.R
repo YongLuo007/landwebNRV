@@ -47,10 +47,13 @@ setMethod(
                             "Plot.Size.m2", "Stand.origin", "Managed."),
              c("GroupNumber", "Type", "NofSubplot", "Longitude", "Latitude",
                "PlotSize", "StandOrigin", "Managed"))
-    headerData <- plotHeaderDataRaw[,.(GroupNumber, Type, NofSubplot, Longitude, Latitude,Easting,
-                                  Northing, Elevation,
+    headerData <- plotHeaderDataRaw[,.(GroupNumber, Type, NofSubplot, Longitude, Latitude,
+                                       Easting, Northing, Meridian, Elevation,
                                   PlotSize, StandOrigin, Managed)]
     headerData[,GroupNumber:=as.character(GroupNumber)]
+    headerData[Meridian == "UTM 117(NAD83)", Zone:=11]
+    headerData[Meridian == "UTM 111(NAD83)", Zone:=12]
+    
     
     # generate head data for each plot, unmanaged, SA available, location available
     headerData_SA <- treeDataRaw[TreeNumber == 0 & (!is.na(DBHage) | !is.na(Stumpage)),]
@@ -67,7 +70,8 @@ setMethod(
     # select PSPs
 
     # select the plots with locations
-    headerData <- headerData[(Longitude !=0 & Latitude != 0) | (Northing != 0 & Easting != 0),]
+    headerData <- headerData[(Longitude !=0 & Latitude != 0) |
+                               (Northing != 0 & Easting != 0 & !is.na(Zone)),]
     # select plots unmanaged
     headerData <- headerData[Managed == "No",]
     # joining the SA information
@@ -121,8 +125,8 @@ setMethod(
     headerData[,MeasureID:=paste("ABPSPMature_", MeasureID, sep = "")]
     setnames(headerData, "GroupNumber", "OrigPlotID1")
     headerData <- headerData[,.(MeasureID, OrigPlotID1, MeasureYear, Longitude,
-                                Latitude, Zone = NA, Easting, Northing, PlotSize, baseYear,
-                                baseSA)]
+                                Latitude, Zone, Easting, Northing = as.numeric(Northing),
+                                PlotSize = PlotSize/10000, baseYear, baseSA)]
     treeData[,MeasureID:=paste("ABPSPMature_", MeasureID, sep = "")]
     setnames(treeData, c("GroupNumber", "PlotNumber"), 
              c("OrigPlotID1", "OrigPlotID2"))

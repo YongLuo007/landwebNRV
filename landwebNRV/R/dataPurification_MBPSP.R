@@ -80,8 +80,8 @@ setMethod(
     treeData <- treeData[,.(MeasureID, OrigPlotID1 = PLOTID, OrigPlotID2 = NA, MeasureYear,
                             TreeNumber, Species,  DBH, Height)]
     headData <- headData[,.(MeasureID, OrigPlotID1 = PLOTID, MeasureYear, Longitude = NA,
-                            Latitude = NA, Zone = 14, Easting, Northing, PlotSize, baseYear,
-                            baseSA)]
+                            Latitude = NA, Zone = 14, Easting, Northing, PlotSize = PlotSize/10000,
+                            baseYear, baseSA)]
     
     return(list(plotHeaderData = headData,
                 treeData = treeData))

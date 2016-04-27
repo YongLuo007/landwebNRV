@@ -71,7 +71,8 @@ setMethod(
                             TreeNumber = TREENO, Species = SPECIES,  DBH, Height = HEIGHT)]
     
     headData <- headData[,.(MeasureID, OrigPlotID1 = ID_FOR, MeasureYear, Longitude = NA,
-                            Latitude = NA, Zone, Easting, Northing, PlotSize,
+                            Latitude = NA, Zone, Easting = Easting*10000,
+                            Northing = Northing*10000, PlotSize,
                             baseYear = MeasureYear, baseSA = SA)]
     
     return(list(plotHeaderData = headData, treeData = treeData))
