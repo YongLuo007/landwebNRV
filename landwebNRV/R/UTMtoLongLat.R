@@ -40,23 +40,24 @@ setMethod(
   signature = c(UTMTable = "data.table", 
                 coordRefTo = "character"),
   definition = function(UTMTable, coordRefTo) {
-    output <- UTMTable[1,]
+    output <- UTMTable[0,]
     output[,':='(Longitude = 0, Latitude = 0)]
     fullUTMInfor <- UTMTable[!is.na(Zone) & !is.na(Easting) & !is.na(Northing),]
     missingUTMInfor <- UTMTable[is.na(Zone) | is.na(Easting) | is.na(Northing),]
     utmZones <- unique(fullUTMInfor$Zone)
     for(utmZone in utmZones){
+      outputAdded <- fullUTMInfor[Zone == utmZone, ]
       crsUTMstring <- CRS(paste("+proj=utm +zone=", utmZone, sep=""))
-      utmcoor <- SpatialPoints(cbind(fullUTMInfor[Zone == utmZone, ]$Easting,
-                                     fullUTMInfor[Zone == utmZone, ]$Northing),
+      utmcoor <- SpatialPoints(cbind(outputAdded$Easting,
+                                     outputAdded$Northing),
                              proj4string = crsUTMstring)
       longlatcoor <- spTransform(utmcoor, CRS(coordRefTo))
       transformed <- data.table(attributes(longlatcoor)$coords)
       names(transformed) <- c("Longitude", "Latitude")
-      outputAdded <- cbind(fullUTMInfor[Zone == utmZone, ], transformed)
+      outputAdded[, ':='(Longitude = transformed$Longitude,
+                         Latitude = transformed$Latitude)]
       output <- rbindlist(list(output, outputAdded))
     }
-    output <- output[-1, ]
     return(list(Transformed  = output, UnTransformed  = missingUTMInfor))
   })
 
@@ -68,7 +69,7 @@ setMethod(
   signature = c(UTMTable = "data.table", 
                 coordRefTo = "missing"),
   definition = function(UTMTable) {
-    ecoregionClassification(UTMTable = UTMTable, 
-                            coordRefTo = "+proj=longlat")
+    UTMtoLongLat(UTMTable = UTMTable, 
+                 coordRefTo = "+proj=longlat")
   })    
 
