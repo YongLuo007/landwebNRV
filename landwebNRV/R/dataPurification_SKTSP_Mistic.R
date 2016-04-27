@@ -45,13 +45,14 @@ setMethod(
                                             PLOTNUM, YEAR, PSIZE, P_AGECLS)]
     
     headData <- unique(headData, by = c("ID_FOR", "PLOTNUM"))
-    headData[,Plotsize := sum(PSIZE), by = ID_FOR]
+    headData[,PlotSize := sum(PSIZE), by = ID_FOR]
     headData <- unique(headData, by = "ID_FOR")[
       , ':='(PLOTNUM = NULL, PSIZE = NULL)]
-    headData[,PlotID:=as.numeric(row.names(headData))]
+    headData[,MeasureID:=paste("SKTSP_Mistik_", row.names(headData), sep = "")]
     setnames(headData, c("CRZNORTH", "CRZ_EAST", "CRZ_ZONE",
              "YEAR", "P_AGECLS"),
-             c("Northing", "Easting", "Zone", "Year", "SA"))
+             c("Northing", "Easting", "Zone", "MeasureYear", "SA"))
+
     treeData <- compiledTreeData[,.(ID_FOR, TREENO, SPECIES, DBH,
                                                HEIGHT, CONDCOD1,
                                                CONDCOD2, CONDCOD3)]
@@ -62,8 +63,16 @@ setMethod(
     treeData <- treeData[CONDCOD3 != "DE",]
     set(treeData, ,c("CONDCOD1", "CONDCOD2", "CONDCOD3"),
         NULL)
-    setnames(treeData, c("TREENO", "SPECIES", "HEIGHT"),
-             c("Treenumber", "Species", "Height"))
+    treeData <- setkey(headData[,.(MeasureID, ID_FOR, MeasureYear)], ID_FOR)[setkey(treeData, ID_FOR),
+                                                                nomatch = 0]
+
+    
+    treeData <- treeData[,.(MeasureID, OrigPlotID1 = ID_FOR, OrigPlotID2 = NA, MeasureYear,
+                            TreeNumber = TREENO, Species = SPECIES,  DBH, Height = HEIGHT)]
+    
+    headData <- headData[,.(MeasureID, OrigPlotID1 = ID_FOR, MeasureYear, Longitude = NA,
+                            Latitude = NA, Zone, Easting, Northing, PlotSize,
+                            baseYear = MeasureYear, baseSA = SA)]
     
     return(list(plotHeaderData = headData, treeData = treeData))
   })

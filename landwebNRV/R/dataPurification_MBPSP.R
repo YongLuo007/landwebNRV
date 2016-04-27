@@ -44,11 +44,10 @@ setMethod(
     measyear <- grep("YEARMEA",   names(MBPSPDataRaw))
     plotsize <- grep("PLOTSIZE",   names(MBPSPDataRaw))
     mincut <- min(dbh, height, status, dominance, age, measyear, plotsize)
-    
     treeData <- MBPSPDataRaw[0,1:24, with = FALSE]
     names(treeData)[18:24] <- c("DBH", "Height", "Status",
-                                             "Class", "Age", "MeasureYear",
-                                             "PlotSize")
+                                "Class", "Age", "MeasureYear",
+                                "PlotSize")
     for(i in 1:length(dbh)){
       treeDataAdd <- MBPSPDataRaw[,c(1:17, dbh[i], height[i], status[i],
                                      dominance[i], age[i], measyear[i], plotsize[i]), with = FALSE]
@@ -73,11 +72,17 @@ setMethod(
     setnames(treeData, c("TREENO", "SPECIES"), c("TreeNumber", "Species"))
     
     measureidtable <- unique(treeData[,.(PLOTID, MeasureYear)], by = c("PLOTID", "MeasureYear"))
-    measureidtable[, MeasureID:=as.numeric(row.names(measureidtable))]
+    measureidtable[, MeasureID:=paste("MBPSP_", row.names(measureidtable), sep = "")]
     measureidtable <- measureidtable[,.(MeasureID, PLOTID, MeasureYear)]
     headData <- setkey(measureidtable, PLOTID)[setkey(headData, PLOTID), nomatch = 0]
     treeData <- setkey(measureidtable, PLOTID, MeasureYear)[setkey(treeData, PLOTID, MeasureYear),
                                                             nomatch = 0]
+    treeData <- treeData[,.(MeasureID, OrigPlotID1 = PLOTID, OrigPlotID2 = NA, MeasureYear,
+                            TreeNumber, Species,  DBH, Height)]
+    headData <- headData[,.(MeasureID, OrigPlotID1 = PLOTID, MeasureYear, Longitude = NA,
+                            Latitude = NA, Zone = 14, Easting, Northing, PlotSize, baseYear,
+                            baseSA)]
+    
     return(list(plotHeaderData = headData,
                 treeData = treeData))
   })

@@ -37,23 +37,38 @@ setMethod(
   signature = c(MBTSPDataRaw = "data.table"),
   definition = function(MBTSPDataRaw) {
     # get SA information using dominant and codominant trees
-    MBTSPDataRaw <- MBTSPDataRaw[,Nofplot:=length(unique(PLOTNO)), by = TILE]
+    MBTSPDataRaw <- MBTSPDataRaw[,Nofplot:=length(unique(PLOTNO)), by = c("FMU", "TILE", "POLY")]
     
+    MBTSPDataRaw <- MBTSPDataRaw[Nofplot == 3 & (!is.na(FMU) & !is.na(TILE) & !is.na(POLY)),] # based on manual, 1 and 2 should be removed
+    tempheader <- unique(MBTSPDataRaw[,.(FMU, TILE, POLY)], by = c("FMU", "TILE", "POLY"))
+    tempheader[, MeasureID:=paste("MBTSP_", row.names(tempheader), sep = "")]
+    MBTSPDataRaw <- setkey(MBTSPDataRaw, FMU, TILE, POLY)[setkey(tempheader, FMU, TILE, POLY),
+                                                          nomatch = 0]
+    MBTSPDataRaw[,OrigPlotID1:=paste(FMU, "_", TILE, "_", POLY, sep = "")]
+        
     headData <- MBTSPDataRaw[!is.na(AGE_BH) & (CC == "D" | CC == "C"),]
-    headData <- headData[, SA:=as.integer(mean(AGE_BH))+8, by = TILE]
+    headData <- headData[, baseSA:=as.integer(mean(AGE_BH))+8, by = MeasureID]
     headData[, PlotSize:=0.02*Nofplot]
-    headData <- headData[,.(TILE, YEAR, EASTING, NORTHING, SA, PlotSize)]
-    headData <- headData[!is.na(EASTING) & !is.na(NORTHING),]
-    headData <- unique(headData, by = "TILE")
-    setnames(headData, c("YEAR", "EASTING", "NORTHING"),
-             c("Year", "Easting", "Northing"))
     
-    treeData <- MBTSPDataRaw[TILE %in% unique(headData$TILE),][
-      ,.(TILE, TREENO, SPP, DBH, HT, COND)]
+    headData <- headData[,.(MeasureID, OrigPlotID1, YEAR, EASTING, NORTHING, baseSA, PlotSize)]
+    headData <- headData[!is.na(EASTING) & !is.na(NORTHING),]
+    headData <- unique(headData, by = "MeasureID")
+    setnames(headData, c("YEAR", "EASTING", "NORTHING"),
+             c("MeasureYear", "Easting", "Northing"))
+    
+    treeData <- MBTSPDataRaw[MeasureID %in% unique(headData$MeasureID),][
+      ,.(MeasureID, OrigPlotID1, TREENO, SPP, DBH, HT, COND)]
     treeData <- treeData[!is.na(COND) | COND != 10,][,COND:=NULL]
-    setnames(treeData, c("TILE", "TREENO", "SPP", "HT"),
-             c("PlotID", "TreeNumber", "Species", "Height"))
-    setnames(headData, "TILE", "PlotID")
+    setnames(treeData, c("TREENO", "SPP", "HT"),
+             c("TreeNumber", "Species", "Height"))
+
+    headData <- headData[,.(MeasureID, OrigPlotID1, MeasureYear, Longitude = NA,
+                            Latitude = NA, Zone = 14, Easting, Northing, PlotSize,
+                            baseYear = MeasureYear, baseSA)]
+    treeData <- setkey(headData[,.(MeasureID, MeasureYear)], MeasureID)[setkey(treeData, MeasureID),
+                                                                        nomatch = 0]
+    treeData <- treeData[,.(MeasureID, OrigPlotID1, OrigPlotID2 = NA, MeasureYear,
+                            TreeNumber, Species,  DBH, Height)]
     return(list(plotHeaderData = headData,
                 treeData = treeData))
   })

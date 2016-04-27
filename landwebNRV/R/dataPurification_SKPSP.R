@@ -133,7 +133,7 @@ setMethod(
     headData <- setkey(measureidtable, OrigPlotID1)[setkey(headData, OrigPlotID1),
                                                nomatch = 0]
     headData <- headData[,.(MeasureID, OrigPlotID1, MeasureYear, Longitude = NA,
-                                Latitude = NA, Zone, Easting, Northing, PlotSize, baseYear,
-                                baseSA)]
+                            Latitude = NA, Zone, Easting, Northing, PlotSize, baseYear,
+                            baseSA)]
     return(list(plotHeaderData = headData, treeData = treeData))
   })
