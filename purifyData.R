@@ -1,9 +1,11 @@
 rm(list=ls())
-treedataraw <- read.csv("C:/Users/yonluo/Documents/LandWeb/Data/AB/ABMatureTreeData.csv",
+# workPath <- "H:/LandWeb/Data/AB"
+workPath <- "C:/Users/yonluo/Documents/LandWeb/Data/AB"
+treedataraw <- read.csv(file.path(workPath, "ABMatureTreeData.csv"),
                         header = TRUE,
                         stringsAsFactor = FALSE) %>%
   data.table
-headdataraw <- read.csv("C:/Users/yonluo/Documents/LandWeb/Data/AB/plotLocation.csv",
+headdataraw <- read.csv(file.path(workPath, "plotLocation.csv"),
                         header = TRUE,
                         stringsAsFactor = FALSE) %>%
   data.table
