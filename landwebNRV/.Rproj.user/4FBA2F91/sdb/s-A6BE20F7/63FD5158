@@ -1,0 +1,17 @@
+{
+    "contents" : "rm(list=ls())\nsource('~/GitHub/landwebNRV/landwebNRV/R/ecoregionClassification.R')\n\nstudyarea <- readRDS(\"C:/Users/yonluo/Documents/LandWeb/landwebsimplePoly.rds\") \necoregionMap <- rgdal::readOGR(\"M:/data/Ecozones/ecozones.shp\",\n                               layer = \"ecozones\")\n\n# this is the first function\ndd <- ecoregionClassification(studyAreaMap = studyarea,\n                              ecoregionMap = ecoregionMap,\n                              cellSize = 100)\nif(file.exists(\"~/GitHub/landwebNRV/studyareaecoregion.tif\")){\n  file.remove(\"~/GitHub/landwebNRV/studyareaecoregion.tif\")\n}\nraster::writeRaster(dd$studyareaecoregion, \"~/GitHub/landwebNRV/studyareaecoregion.tif\",\n                    overwrite=TRUE)\nw <- rgdal::readGDAL(\"~/GitHub/landwebNRV/studyareaecoregion.tif\")\nrgdal::writeGDAL(w, \"~/GitHub/landwebNRV/studyareaecoregion.tif\",\n                 drivername = \"GTiff\", type = \"Int32\", mvFlag = 0)\n\n\nstudyareaecoregion <- raster(\"~/GitHub/landwebNRV/studyareaecoregion.tif\")\n\nsource('~/GitHub/landwebNRV/landwebNRV/R/plotsByEcoregion.R')\nload(\"~/GitHub/landwebNRV/pureStand.RData\")\npureStandHeader <- allPlotHeaderData[MeasureID %in% pureStand$MeasureID,]\n\npureStandbyEcoregion <- plotsByEcoregion(plotLocation = pureStandHeader, studyAreaEcoregionMap = studyareaecoregion)\n\n\n",
+    "created" : 1461780970393.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "263180658",
+    "id" : "63FD5158",
+    "lastKnownWriteTime" : 1461782311,
+    "path" : "~/GitHub/landwebNRV/connectingPureStandToStudyArea.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
