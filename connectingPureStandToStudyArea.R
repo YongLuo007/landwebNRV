@@ -1,30 +1,41 @@
+
 rm(list=ls())
-source('~/GitHub/landwebNRV/landwebNRV/R/ecoregionClassification.R')
-
-studyarea <- readRDS("C:/Users/yonluo/Documents/LandWeb/landwebsimplePoly.rds") 
-ecoregionMap <- rgdal::readOGR("M:/data/Ecozones/ecozones.shp",
-                               layer = "ecozones")
-
-# this is the first function
-dd <- ecoregionClassification(studyAreaMap = studyarea,
-                              ecoregionMap = ecoregionMap,
-                              cellSize = 100)
-if(file.exists("~/GitHub/landwebNRV/studyareaecoregion.tif")){
-  file.remove("~/GitHub/landwebNRV/studyareaecoregion.tif")
-}
-raster::writeRaster(dd$studyareaecoregion, "~/GitHub/landwebNRV/studyareaecoregion.tif",
-                    overwrite=TRUE)
-w <- rgdal::readGDAL("~/GitHub/landwebNRV/studyareaecoregion.tif")
-rgdal::writeGDAL(w, "~/GitHub/landwebNRV/studyareaecoregion.tif",
-                 drivername = "GTiff", type = "Int32", mvFlag = 0)
-
-
-studyareaecoregion <- raster("~/GitHub/landwebNRV/studyareaecoregion.tif")
 
 source('~/GitHub/landwebNRV/landwebNRV/R/plotsByEcoregion.R')
 load("~/GitHub/landwebNRV/pureStand.RData")
 pureStandHeader <- allPlotHeaderData[MeasureID %in% pureStand$MeasureID,]
 
-pureStandbyEcoregion <- plotsByEcoregion(plotLocation = pureStandHeader, studyAreaEcoregionMap = studyareaecoregion)
+# pureStandbyEcoregion <- plotsByEcoregion(plotLocation = pureStandHeader, studyAreaEcoregionMap = studyareaecoregion)
+
+
+studyarea <- readRDS("C:/Users/yonluo/Documents/LandWeb/landwebsimplePoly.rds") 
+ecoregionMap <- rgdal::readOGR("M:/data/Ecozones/ecozones.shp",
+                               layer = "ecozones")
+studyarea <- spTransform(studyarea, crs(ecoregionMap))
+
+studyareawithecoregion <- intersect(ecoregionMap, studyarea)
+
+plotsbyEcoregion <- plotsByEcoregion(plotLocation = pureStandHeader,
+                                     studyAreaEcoregionMap = studyareawithecoregion)
+pureStandInEcoregion <- setkey(pureStand, MeasureID)[setkey(plotsbyEcoregion, MeasureID),
+                                                     nomatch = 0]
+setnames(pureStandInEcoregion, "ECOZONE", "Ecoregion")
+ecoregionSpecies <- unique(pureStandInEcoregion[,.(Ecoregion, Species)],
+                           by = c("Ecoregion", "Species")) %>%
+  setkey(.,Ecoregion, Species)
+# instead of using POM and quantile regresssion analyses, I used 90% quantile for the
+# maximum Biomass
+for(i in 1:NROW(ecoregionSpecies)){
+  print(ecoregionSpecies[i,])
+  Biomass <- pureStandInEcoregion[Ecoregion == ecoregionSpecies[i,]$Ecoregion &
+                                    Species == ecoregionSpecies[i,]$Species,]$Biomass
+  maxb <- quantile(Biomass/10, probs = 0.8)
+  ecoregionSpecies[i, maxB:=maxb]
+}
+specieses <- unique(ecoregionSpecies$Species)
+for(species in specieses){
+  print(ecoregionSpecies[Species == species,])
+}
+
 
 

@@ -44,9 +44,12 @@ unique(ABPSPtreeData[Biomass==0,]$newSpeciesName)
 ABPSPtreeData[newSpeciesName == "limber pine" | newSpeciesName == "whitebark pine",
               newSpeciesName:="softwood"]
 
+
 ABPSPtreeData[, Biomass:=biomassCalculation(species = newSpeciesName, DBH = DBH)$biomass]
 # unique(ABPSPtreeData[Biomass==0,]$newSpeciesName)
 pureStand <- speciesDominanceIdentification(ABPSPtreeData)
+ABPSPtreeData[, Species:=NULL]
+allTreeData <- ABPSPtreeData
 
 
 # working on AB PSP
@@ -60,7 +63,8 @@ unique(BCPSPtreeData[Biomass==0,]$newSpeciesName)
 # [5] "scoulers willow" 
 # 
 pureStand <- rbind(pureStand, speciesDominanceIdentification(BCPSPtreeData))
-
+BCPSPtreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, BCPSPtreeData)
 
 
 
@@ -77,6 +81,9 @@ SKPSPtreeData[, Biomass:=biomassCalculation(species = newSpeciesName, DBH = DBH)
 unique(SKPSPtreeData[Biomass==0,]$newSpeciesName)
 # [1] "unknown"        "manitoba maple"
 pureStand <- rbind(pureStand, speciesDominanceIdentification(SKPSPtreeData))
+SKPSPtreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, SKPSPtreeData)
+
 
 
 SKTSP_MistiktreeData <- SKTSP_Mistik_output$treeData
@@ -89,7 +96,8 @@ SKTSP_MistiktreeData[, Biomass:=biomassCalculation(species = newSpeciesName, DBH
 unique(SKTSP_MistiktreeData[Biomass==0,]$newSpeciesName)
 # unknown
 pureStand <- rbind(pureStand, speciesDominanceIdentification(SKTSP_MistiktreeData))
-
+SKTSP_MistiktreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, SKTSP_MistiktreeData)
 
 
 SKTSP_PPPAtreeData <- SKTSP_PPPA_output$treeData
@@ -100,6 +108,9 @@ SKTSP_PPPAtreeData[, Biomass:=biomassCalculation(species = newSpeciesName, DBH =
 unique(SKTSP_PPPAtreeData[Biomass==0,]$newSpeciesName)
 # [1] "manitoba maple" "green ash"  
 pureStand <- rbind(pureStand, speciesDominanceIdentification(SKTSP_PPPAtreeData))
+SKTSP_PPPAtreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, SKTSP_PPPAtreeData)
+
 
 
 NFIPSPtreeData <- NFIPSPoutput$treeData
@@ -114,7 +125,8 @@ unique(NFIPSPtreeData[Biomass==0,]$newSpeciesName)
 # [5] "unknown"        "poplar"        
 # [7] "bur oak"
 pureStand <- rbind(pureStand, speciesDominanceIdentification(NFIPSPtreeData))
-
+NFIPSPtreeData[, ':='(Species=NULL, Genus=NULL)]
+allTreeData <- rbind(allTreeData, NFIPSPtreeData)
 
 
 MBPSPtreeData <- MBPSPoutput$treeData
@@ -128,7 +140,8 @@ unique(MBPSPtreeData[Biomass==0,]$newSpeciesName)
 # [1] "unknown"          
 # [3] "manitoba maple" 
 pureStand <- rbind(pureStand, speciesDominanceIdentification(MBPSPtreeData))
-
+MBPSPtreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, MBPSPtreeData)
 
 
 MBTSPtreeData <- MBTSPoutput$treeData
@@ -142,7 +155,8 @@ unique(MBTSPtreeData[Biomass==0,]$newSpeciesName)
 # [1] "unknown"           
 # [3] "manitoba maple" 
 pureStand <- rbind(pureStand, speciesDominanceIdentification(MBTSPtreeData))
-
+MBTSPtreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, MBTSPtreeData)
 
 
 NWTTSPtreeData <- NWTTSPoutput$treeData
@@ -152,5 +166,21 @@ nrow(NWTTSPtreeData[newSpeciesName == "unknown",])
 NWTTSPtreeData[, Biomass:=biomassCalculation(species = newSpeciesName, DBH = DBH)$biomass]
 unique(NWTTSPtreeData[Biomass==0,]$newSpeciesName) # willow
 pureStand <- rbind(pureStand, speciesDominanceIdentification(NWTTSPtreeData))
+
+pureStand <- setkey(pureStand, MeasureID)[setkey(allPlotHeaderDataLongLat[,.(MeasureID, MeasureYear, PlotSize, baseYear, baseSA)], 
+                                                 MeasureID), nomatch = 0]
+pureStand[,':='(SA = MeasureYear-baseYear+baseSA, Biomass = PlotBiomass/PlotSize)]
+
+pureStand <- pureStand[,.(MeasureID, Species, SA, Biomass)]
+NWTTSPtreeData[, Species:=NULL]
+allTreeData <- rbind(allTreeData, NWTTSPtreeData)
+allPlotHeaderData <- allPlotHeaderDataLongLat
+
+rm(list=ls(, pattern = "output"))
+rm(list=ls(, pattern = "treeData"))
+rm(allPlotHeaderDataLongLat, allPlotHeaderDataNoLongLat, biomassCalculation,
+   speciesDominanceIdentification, standardizeSpeciesName, UTMtoLongLat,
+   workPath)
+save.image("~/GitHub/landwebNRV/pureStand.RData")
 
 

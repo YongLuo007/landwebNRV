@@ -1,5 +1,5 @@
 ################################################################################
-#' this function is to classify plot to pure stand based on biomass (>=90%) 
+#' this function is to classify plot to pure stand based on biomass (>=70%) 
 #' 
 #' 
 #' @param biomassTable, data.table.  It must has three columns, MeasureID, newSpeciesName and Biomass
@@ -37,7 +37,7 @@ setMethod(
     biomassTable[, PlotBiomass:=sum(Biomass), by = MeasureID]
     biomassTable[, PlotBiomassBySpecies:=sum(Biomass), by = c("newSpeciesName", "MeasureID")]
     biomassTable[, SpeciesPercentage:=PlotBiomassBySpecies/PlotBiomass]
-    biomassTable <- biomassTable[SpeciesPercentage >= 0.90,]
+    biomassTable <- biomassTable[SpeciesPercentage >= 0.70,]
     summaryTable <- unique(biomassTable[,.(MeasureID, newSpeciesName, PlotBiomass)], by = "MeasureID")
     setnames(summaryTable, "newSpeciesName", "Species")
     return(dominantSpeciesTable=summaryTable)
