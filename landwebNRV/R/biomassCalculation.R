@@ -17,6 +17,8 @@
 #'        Default \code{Lambert2005}
 #'
 #' @return Biomass (kg) and missedSpecies list that was not calculated.
+#' 
+#' @importFrom data.table data.table ':='
 #'
 #' @note no note
 #'

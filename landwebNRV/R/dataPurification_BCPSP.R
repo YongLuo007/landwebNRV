@@ -11,7 +11,8 @@
 #' @return  two data tables, the first one head data, which contains the location and SA info.
 #'                           the second one is purified tree data, which contains inividual tree infor.
 #'                           for the tree data, all trees are alive.
-#'                      
+#'  
+#' @importFrom data.table setkey setnames ':=' set
 #'
 #' @note no note
 #'

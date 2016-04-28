@@ -14,6 +14,7 @@
 #'          the newSpeciesName is the standardized name, unknown means the species in 
 #'          the original species table can not be found according to manual
 #'                      
+#' @importFrom data.table ':='
 #'
 #' @note no note
 #'

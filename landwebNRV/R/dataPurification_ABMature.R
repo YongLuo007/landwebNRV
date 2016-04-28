@@ -14,7 +14,8 @@
 #'                           the second one is purified tree data, which contains inividual tree infor.
 #'                           for the tree data, all trees are alive.
 #'                      
-#'
+#' @importFrom data.table ':=' setnames setkey
+#' 
 #' @note no note
 #'
 #' @seealso no

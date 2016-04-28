@@ -8,7 +8,7 @@
 #' @param pspType,  Character string. It tells which data source from,
 #'                  ie., Mature or Juvenile. It must be one of these
 #'        
-#'
+#' @importFrom data.table data.table
 #' @return  
 #'                      
 #'

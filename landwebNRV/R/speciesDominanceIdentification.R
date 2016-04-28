@@ -6,6 +6,8 @@
 #'
 #'
 #' @return species dominant table
+#' 
+#' @importFrom data.table ':=' unique
 #'
 #' @note no note
 #'

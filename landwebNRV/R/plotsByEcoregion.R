@@ -9,8 +9,12 @@
 #'        
 #' 
 #' 
-#' @return a data table object. It has the PlotID for each ecoregion in the study area. 
-#'
+#' @return a data table object. It has the PlotID for each ecoregion in the study area.
+#' 
+#' @importFrom sp coordinates proj4string
+#' @importFrom raster crop raster extent crs rasterize getValues
+#' @importFrom data.table data.table
+#' 
 #' @note no note
 #'
 #' @seealso no

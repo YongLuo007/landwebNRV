@@ -14,6 +14,10 @@
 #' @return Two objects: studyareaecoregion is RasterLayer 
 #'                      and attributesTable is data table
 #'
+#' @importFrom sp spTransform
+#' @importFrom raster raster crs crop extent rasterize mask getValues
+#' @importFrom data.table data.table
+#'
 #' @note no note
 #'
 #' @seealso no
