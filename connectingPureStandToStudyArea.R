@@ -38,4 +38,11 @@ for(species in specieses){
 }
 
 
+BBYSAfigure <- ggplot(data = pureStandInEcoregion[Species == "jack pine"],
+                      aes(x = SA, y = Biomass, colour = Ecoregion))+
+  geom_point()
+
+
+
+
 
