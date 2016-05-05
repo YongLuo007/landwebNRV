@@ -8,7 +8,7 @@ speciesComMap <- raster(file.path("~/LandWeb/speciesMap",
 speciesComMap <- as.logical(speciesComMap)
 speciesComMap[Which(is.na(speciesComMap), cells = TRUE, na.rm = FALSE)] <- 0
 k <- 1
-for(species in speciesNames[2:9]){
+for(species in speciesNames[2:length(speciesNames)]){
   speciesMap <- raster(file.path("~/LandWeb/speciesMap",
                                  paste(species, ".tif", sep = "")))
   speciesMap <- as.logical(speciesMap)
@@ -29,12 +29,12 @@ initialCommunities[,mapCodeStr:=as.character(mapCode)]
 
 initialCommunities[, NofStr:=nchar(mapCodeStr)]
 for(i in 1:8){
-  initialCommunities[NofStr==i, mapCodeFull:=paste(paste(rep("0",(9-i)),
+  initialCommunities[NofStr==i, mapCodeFull:=paste(paste(rep("0",(length(speciesNames)-i)),
                                                          collapse = ""),
                                                    mapCodeStr,
                                                    sep = "")]
 }
-initialCommunities[NofStr==9, mapCodeFull:=mapCodeStr]
+initialCommunities[NofStr==length(speciesNames), mapCodeFull:=mapCodeStr]
 
 
 output <- data.table(mapCode = numeric(), speciesPresence = character(),
@@ -42,10 +42,9 @@ output <- data.table(mapCode = numeric(), speciesPresence = character(),
 for(i in 1:nrow(initialCommunities)){
   outputAdd <- data.table(mapCode = initialCommunities$mapCode[i],
                           speciesPresence = substring(initialCommunities$mapCodeFull[i],
-                                                      seq(1, 9, 1), seq(1, 9, 1)),
-                          species = c("Popu_Tre", "Pinu_Str", "Pinu_Con", "Pinu_Ban",
-                                      "Pice_Mar", "Pice_Gla", "Betu_Pap", "Abie_Las", 
-                                      "Abie_Bal"))
+                                                      seq(1, length(speciesNames), 1),
+                                                      seq(1, length(speciesNames), 1)),
+                          species = speciesNames[length(speciesNames):1])
   
   output <- rbind(output, outputAdd)
 }
@@ -63,12 +62,18 @@ indexTable <- data.table(pixelIndex=1:ncell(speciesComMap),
 indexTable <- indexTable[!is.na(mapCode),]
 indexTable <- setkey(indexTable, mapCode)[setkey(mapcodeconnection, mapCode),
                                           nomatch = 0]
-
 speciesComMap[indexTable$pixelIndex] <- indexTable$newMapCode
+
+initialCommunities[, ':='(mapCode = newMapCode, newMapCode = NULL, speciesPresence = NULL)]
+write.csv(initialCommunities, "initialCommunities.csv", row.names = FALSE)
+
+
+activeRegion <- raster("~/LandWeb/activeRegion_studyarea.tif")
+speciesComMap[Which(activeRegion==0, cells = TRUE)] <- NA
 
 raster::writeRaster(speciesComMap, 
                     file.path("~/LandWeb/initialCommunities.tif"),
                     overwrite=TRUE)
 
-initialCommunities[, ':='(mapCode = newMapCode, newMapCode = NULL, speciesPresence = NULL)]
-write.csv(initialCommunities, "initialCommunities.csv", row.names = FALSE)
+
+
