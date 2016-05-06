@@ -61,3 +61,63 @@ coordRefTo <- "+proj=longlat +ellps=GRS80 +no_defs"
 
 dd <- UTMtoLongLat(UTMTable = utmdata, 
                    coordRefTo = coordRefTo)
+
+
+rm(list=ls())
+filePath <- "M:/data/kNN/Original"
+speciesNames <- c("Abie_Bal", "Abie_Las", "Betu_Pap", "Pice_Gla", "Pice_Mar",
+                  "Pinu_Ban", "Pinu_Con", "Pinu_Str", "Popu_Tre")
+speciesLayers <- stack()
+
+for(species in speciesNames){
+  speciesLayer <- raster(file.path(filePath, paste("NFI_MODIS250m_kNN_Species_",
+                                                   species,"_v0.tif",
+                                                   sep = "")))
+  speciesLayers <- stack(speciesLayers, speciesLayer)
+}
+names(speciesLayers) <- speciesNames
+saveRDS(speciesLayers, "speciesLayersStack.rds")
+
+
+
+rm(list=ls())
+speciesLayers <- readRDS("speciesLayersStack.rds")
+studyArea <- readRDS("randomStudyArea.rds")
+
+
+# dd <- initialCommunityMapkNN(speciesLayers, speciesNames, studyArea)
+dd <- initialCommunityMapProducer_kNN(speciesLayers = speciesLayers, studyArea = studyArea)
+
+
+
+
+rm(list = ls())
+a <- readRDS("initialCommMap.rds")
+b <- shapefile("M:/data/Ecozones/ecozones.shp")
+c <- "ZONE_NAME"
+d <- data.table(active = "yes",
+                                    ecoregion = c("Taiga Cordillera", "Boreal PLain", "Taiga Shield",
+                                                  "Boreal Cordillera", 
+                                                   "Boreal Shield", "Hudson Plain", 
+                                                  "Montane Cordillera",  "MixedWood Plain"))
+e <- readRDS("randomStudyArea.rds")
+
+ecoregionMap <- ecoregionMapProducer(studyAreaRaster = a,
+                                     ecoregionMapFull = b,
+                                     ecoregionName = c,
+                                     ecoregionActiveStatus = d,
+                                     studyArea = e)
+rm(list=ls())
+a <- readRDS("nonactiveEcoPoly.rds")
+b <- raster("ecoregionMap.tif")
+c <- read.csv("ecoregion.csv", header=T, stringsAsFactor = F) %>%
+  data.table
+d <- readRDS("initialCommMap.rds")
+e <- readRDS("initialComm.rds")
+source('~/GitHub/landwebNRV/landwebNRV/R/nonactiveEcoFromPolys.R')
+removeNonEco <- nonactiveEcoFromPolys(nonactivePolys = a,
+                                      ecoregionMap = b,
+                                      ecoregion = c,
+                                      initialCommunityMap = d,
+                                      initialCommunity = e)
+
