@@ -121,3 +121,25 @@ removeNonEco <- nonactiveEcoFromPolys(nonactivePolys = a,
                                       initialCommunityMap = d,
                                       initialCommunity = e)
 
+
+rm(list = ls())
+a <- raster("M:/data/LandCoverOfCanada2005_V1_4/LCC2005_V1_4a.tif")
+b <- raster("ecoregionMap.tif")
+c <- read.csv("ecoregion.csv", header=T, stringsAsFactor = F) %>%
+  data.table
+d <- readRDS("initialCommMap.rds")
+e <- readRDS("initialComm.rds")
+f <- data.table(active = c(rep("yes", 16), rep("no", 24)),
+                mapcode = 1:40)
+
+source('~/GitHub/landwebNRV/landwebNRV/R/nonactiveEcoFromRaster.R')
+removeNonEco <- nonactiveEcoFromRaster(nonactiveRaster = a,
+                                       activeStatus = f,
+                                       ecoregionMap = b,
+                                       ecoregion = c,
+                                       initialCommunityMap = d,
+                                       initialCommunity = e)
+
+
+
+
