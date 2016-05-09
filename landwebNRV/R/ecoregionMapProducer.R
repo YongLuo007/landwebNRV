@@ -70,13 +70,26 @@ setMethod(
                                  ecoregion = character())
     mapcode <- 1
     for(ecoregion in ecoregions){
-      ecoregionTable <- rbind(ecoregionTable, 
-                              data.table(mapcode = mapcode,
-                                         ecoregion = ecoregion)) 
       singleecoMapPoly <- ecoregionMapInStudy[ecoregionMapInStudy@data[,ecoregionName]==ecoregion,]
       studyAreaRaster <- setValues(studyAreaRaster, mapcode)
       singleecoMapRaster <- crop(studyAreaRaster, singleecoMapPoly)
       singleecoMapRaster <- mask(singleecoMapRaster, singleecoMapPoly)
+      if(length(unique(getValues(singleecoMapRaster)))==1){
+        if(is.na(unique(getValues(singleecoMapRaster)))){
+          ecoregionTable <- rbind(ecoregionTable, 
+                                  data.table(mapcode = NA,
+                                             ecoregion = ecoregion)) 
+        } else {
+          ecoregionTable <- rbind(ecoregionTable, 
+                                  data.table(mapcode = mapcode,
+                                             ecoregion = ecoregion))
+        }
+      } else {
+        ecoregionTable <- rbind(ecoregionTable, 
+                                data.table(mapcode = mapcode,
+                                           ecoregion = ecoregion))
+      }
+       
       if(mapcode == 1){
         ecoregionMap <- singleecoMapRaster
       } else {
@@ -84,6 +97,8 @@ setMethod(
       }
       mapcode <- mapcode + 1
     }
+    ecoregionActiveStatus[, ecoregion:=as.character(ecoregion)]
+    ecoregionTable <- ecoregionTable[!is.na(mapcode),]
     ecoregionTable <- dplyr::left_join(ecoregionTable,
                                        ecoregionActiveStatus,
                                        by = "ecoregion") %>%

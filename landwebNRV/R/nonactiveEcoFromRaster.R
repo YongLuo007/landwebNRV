@@ -63,7 +63,6 @@ setMethod(
                         initialCommunityMap,
                         initialCommunity) {
     
-    browser()
     projection(nonactiveRaster) <- projection(ecoregionMap)
     nonactiveRasterSmall <- crop(nonactiveRaster, ecoregionMap)
     nonecomapcode <- activeStatus[active=="no",]$mapcode

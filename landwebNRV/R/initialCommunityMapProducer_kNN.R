@@ -45,7 +45,6 @@ setMethod(
                         speciesNames,
                         studyArea) {
     
-    
     studyArea <- spTransform(studyArea, crs(speciesLayers))
     specieslayerBySpecies <- subset(speciesLayers, speciesNames)
     specieslayerBySpeciesInStudyArea <- crop(specieslayerBySpecies,
@@ -97,8 +96,8 @@ setMethod(
                                               nomatch = 0]
     speciesComMap[indexTable$pixelIndex] <- indexTable$newMapCode
     initialCommunities[, ':='(mapcode = newMapCode, newMapCode = NULL, speciesPresence = NULL)]
-    return(list(initialCommunitiesMap = speciesComMap,
-                initialCommunities = initialCommunities))
+    return(list(initialCommunityMap = speciesComMap,
+                initialCommunity = initialCommunities))
   })
 
 
