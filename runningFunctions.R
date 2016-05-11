@@ -142,4 +142,18 @@ removeNonEco <- nonactiveEcoFromRaster(nonactiveRaster = a,
 
 
 
+rm(list=ls())
+load("C:/Users/Yong Luo/Documents/GitHub/landwebNRV/pureStand.RData")
+load("C:/Users/Yong Luo/Documents/GitHub/landwebNRV/simulationMaps.RData")
+
+source('~/GitHub/landwebNRV/landwebNRV/R/biomassAttributes_Groundplots.R')
+
+dd <- biomassAttributes_Groundplots(plotHeader = plotHeader,
+                                    plotID = "MeasureID",
+                                    pureStandBiomass = pureStandBiomass,
+                                    ecoregionMap = ecoregionMap)
+
+
+
+
 
