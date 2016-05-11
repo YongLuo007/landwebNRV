@@ -37,7 +37,7 @@ setMethod(
     biomassTable[, PlotBiomass:=sum(Biomass), by = MeasureID]
     biomassTable[, PlotBiomassBySpecies:=sum(Biomass), by = c("newSpeciesName", "MeasureID")]
     biomassTable[, SpeciesPercentage:=PlotBiomassBySpecies/PlotBiomass]
-    biomassTable <- biomassTable[SpeciesPercentage >= 0.70,]
+    biomassTable <- biomassTable[SpeciesPercentage >= 0.50,] # set as 50%
     summaryTable <- unique(biomassTable[,.(MeasureID, newSpeciesName, PlotBiomass)], by = "MeasureID")
     setnames(summaryTable, "newSpeciesName", "Species")
     return(dominantSpeciesTable=summaryTable)

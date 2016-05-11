@@ -73,7 +73,7 @@ setMethod(
       singleecoMapPoly <- ecoregionMapInStudy[ecoregionMapInStudy@data[,ecoregionName]==ecoregion,]
       studyAreaRaster <- setValues(studyAreaRaster, mapcode)
       singleecoMapRaster <- crop(studyAreaRaster, singleecoMapPoly)
-      singleecoMapRaster <- mask(singleecoMapRaster, singleecoMapPoly)
+      singleecoMapRaster <- suppressWarnings(mask(singleecoMapRaster, singleecoMapPoly))
       if(length(unique(getValues(singleecoMapRaster)))==1){
         if(is.na(unique(getValues(singleecoMapRaster)))){
           ecoregionTable <- rbind(ecoregionTable, 

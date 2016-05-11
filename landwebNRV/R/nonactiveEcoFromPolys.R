@@ -55,7 +55,7 @@ setMethod(
                         initialCommunity) {
     nonactivePolys <- spTransform(nonactivePolys, crs(ecoregionMap))
     temprasterlayer <- setValues(ecoregionMap, 1)
-    nonactiveLayer <- mask(temprasterlayer, nonactivePolys)
+    nonactiveLayer <- suppressWarnings(mask(temprasterlayer, nonactivePolys))
     initialCommunityMap[Which(nonactiveLayer==1, cells = TRUE)] <- NA
     ecoregionMap[Which(nonactiveLayer==1, cells = TRUE)] <- NA
     initialCommunity <- initialCommunity[mapcode %in% sort(unique(getValues(initialCommunityMap))),]

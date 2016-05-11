@@ -44,24 +44,25 @@ setMethod(
   definition = function(speciesLayers,
                         speciesNames,
                         studyArea) {
-    
     studyArea <- spTransform(studyArea, crs(speciesLayers))
-    specieslayerBySpecies <- subset(speciesLayers, speciesNames)
-    specieslayerBySpeciesInStudyArea <- crop(specieslayerBySpecies,
+    specieslayerInStudyArea <- crop(speciesLayers,
                                              studyArea)
-    specieslayerBySpeciesInStudyArea <- mask(specieslayerBySpeciesInStudyArea,
-                                             studyArea)
-    
-    speciesComMap <- subset(specieslayerBySpeciesInStudyArea, speciesNames[1])
-    speciesComMap <- as.logical(speciesComMap)
-    speciesComMap[Which(is.na(speciesComMap), cells = TRUE, na.rm = FALSE)] <- 0
+    specieslayerInStudyArea <- suppressWarnings(mask(specieslayerInStudyArea,
+                                             studyArea))
+    specieslayerBySpecies <- subset(specieslayerInStudyArea, speciesNames[1])
+    specieslayerBySpecies[Which(is.na(specieslayerBySpecies) & specieslayerBySpecies<=5,
+                                cells = TRUE)] <- 0 # 5% or less presence removed
+    speciesComMap <- as.logical(specieslayerBySpecies)
+    rm(specieslayerBySpecies)
     k <- 1
     for(species in speciesNames[2:length(speciesNames)]){
-      speciesMap <- subset(specieslayerBySpeciesInStudyArea, species)
-      speciesMap <- as.logical(speciesMap)
-      speciesMap[Which(is.na(speciesMap), cells = TRUE, na.rm = FALSE)] <- 0
+      specieslayerBySpecies <- subset(specieslayerInStudyArea, species)
+      specieslayerBySpecies[Which(is.na(specieslayerBySpecies) & specieslayerBySpecies <=5,
+                                   cells = TRUE)] <- 0
+      speciesMap <- as.logical(specieslayerBySpecies)
       speciesComMap <- speciesMap*(10^k)+speciesComMap
       k <- k+1
+      rm(specieslayerBySpecies, speciesMap)
     }
     # set the non-forested area as NA
     speciesComMap[Which(speciesComMap==0, cells = TRUE, na.rm = FALSE)] <- NA
