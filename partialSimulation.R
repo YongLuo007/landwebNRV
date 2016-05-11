@@ -1,30 +1,29 @@
 rm(list=ls())
-setwd("C:/Users/yonluo/Documents/GitHub/landwebNRV/inputs")
+setwd("C:/Users/yonluo/Documents/GitHub/landwebNRV")
 # these codes to divide study area into several ecozones
 # and for each ecozone, ecoregion is defined by ecoDistrict
-library(dplyr); library(data.table); library(raster); library(sp)
+library(dplyr); library(data.table); library(raster); library(sp); library(SpaDES)
 studyarea <- readRDS("C:/Users/yonluo/Documents/LandWeb/landwebsimplePoly.rds") 
-saveRDS(studyarea, "studyarea.rds")
+
 ecozones <- shapefile("M:/data/Ecozones/ecozones.shp")
-saveRDS(ecozones, "ecozones.rds")
 studyarea <- spTransform(studyarea, crs(ecozones))
 studyareaEcozone <- raster::intersect(ecozones, studyarea)
 ecozones <- sort(unique(studyareaEcozone@data$ZONE_NAME))
 ecoDistricts <- shapefile("M:/data/ecoFramework/Ecodistricts/ecodistricts.shp")
-saveRDS(ecoDistricts, "ecoDistricts.rds")
-allData <- list()
-i <- 1
+activeStatus <- data.table(active = "yes",
+                           ecoregion = 1:1031)
+# allData <- list()
+# i <- 1
 specieslayers <- readRDS("C:/Users/yonluo/Documents/GitHub/landwebNRV/speciesLayersStack.rds")
 speciesnames <- names(specieslayers)
-for(ecozone in ecozones){
+for(ecozone in ecozones[2:2]){
   studyarea_sub <- studyareaEcozone[studyareaEcozone@data$ZONE_NAME == ecozone,]
   studyarea_sub <- SpatialPolygons(studyarea_sub@polygons, proj4string = studyarea_sub@proj4string)
   source('~/GitHub/landwebNRV/landwebNRV/R/initialCommunityMapProducer_kNN.R')
   initialCommFiles <- initialCommunityMapProducer_kNN(speciesLayers = specieslayers, 
                                                       speciesNames = speciesnames,
                                                       studyArea = studyarea_sub)
-  activeStatus <- data.table(active = "yes",
-                             ecoregion = 1:1031)
+
   source('~/GitHub/landwebNRV/landwebNRV/R/ecoregionMapProducer.R')
   ecoregionFiles <- ecoregionMapProducer(studyAreaRaster = initialCommFiles$initialCommunityMap,
                                          ecoregionMapFull = ecoDistricts,
@@ -41,8 +40,8 @@ for(ecozone in ecozones){
                                         ecoregion = ecoregionFiles$ecoregion,
                                         initialCommunityMap = initialCommFiles$initialCommunityMap,
                                         initialCommunity = initialCommFiles$initialCommunity)
-  allData[[i]] <- alldataAdded
-  i <- i+1
+  # allData[[i]] <- alldataAdded
+  # i <- i+1
 }
 
 

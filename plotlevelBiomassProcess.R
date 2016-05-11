@@ -169,7 +169,7 @@ pureStand <- rbind(pureStand, speciesDominanceIdentification(NWTTSPtreeData))
 
 pureStand <- setkey(pureStand, MeasureID)[setkey(allPlotHeaderDataLongLat[,.(MeasureID, MeasureYear, PlotSize, baseYear, baseSA)], 
                                                  MeasureID), nomatch = 0]
-pureStand[,':='(SA = MeasureYear-baseYear+baseSA, Biomass = PlotBiomass/PlotSize)]
+pureStand[,':='(SA = MeasureYear-baseYear+baseSA, Biomass = PlotBiomass/PlotSize)] # the unique is kg/ha
 
 pureStand <- pureStand[,.(MeasureID, Species, SA, Biomass)]
 NWTTSPtreeData[, Species:=NULL]
