@@ -4,8 +4,7 @@
 #' 
 #' @param speciesLayers  RasterStack. It contains all the species raster layers of kNN.
 #'
-#' @param speciesNames  character. It contains a vect of species names. 
-#'                      species name must be in names(speciesLayers)
+#' @param speciesPresence  numeric. Define a presence cut point for a species in a pixel
 #' 
 #' @param studyArea  SpatialPolygons. Specify study area.
 #' 
@@ -29,7 +28,7 @@
 #' @author Yong Luo
 #'
 setGeneric("initialCommunityMapProducer_kNN", function(speciesLayers,
-                                                       speciesNames,
+                                                       speciesPresence,
                                                        studyArea) {
   standardGeneric("initialCommunityMapProducer_kNN")
 })
@@ -39,16 +38,17 @@ setGeneric("initialCommunityMapProducer_kNN", function(speciesLayers,
 setMethod(
   "initialCommunityMapProducer_kNN",
   signature = c(speciesLayers = "RasterStack", 
-                speciesNames = "character", 
+                speciesPresence = "numeric", 
                 studyArea = "SpatialPolygons"),
   definition = function(speciesLayers,
-                        speciesNames,
+                        speciesPresence,
                         studyArea) {
     studyArea <- spTransform(studyArea, crs(speciesLayers))
     specieslayerInStudyArea <- crop(speciesLayers,
                                              studyArea)
     specieslayerInStudyArea <- suppressWarnings(mask(specieslayerInStudyArea,
                                              studyArea))
+    speciesNames <- names(specieslayerInStudyArea)[which(maxValue(specieslayerInStudyArea)>=speciesPresence)]
     specieslayerBySpecies <- subset(specieslayerInStudyArea, speciesNames[1])
     specieslayerBySpecies[Which(is.na(specieslayerBySpecies) & specieslayerBySpecies<=5,
                                 cells = TRUE)] <- 0 # 5% or less presence removed
@@ -107,10 +107,10 @@ setMethod(
 setMethod(
   "initialCommunityMapProducer_kNN",
   signature = c(speciesLayers = "RasterStack", 
-                speciesNames = "missing", 
+                speciesPresence = "missing", 
                 studyArea = "SpatialPolygons"),
   definition = function(speciesLayers, studyArea) {
     initialCommunityMapProducer_kNN(speciesLayers = speciesLayers,
-                                    speciesNames = names(speciesLayers),
+                                    speciesPresence = 0.5,
                                     studyArea = studyArea)
   })

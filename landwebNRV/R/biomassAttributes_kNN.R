@@ -1,7 +1,6 @@
 ################################################################################
-#' this function is to generate ecoregion map for landis input for a given raster layer
-#' in order to be consistent with map of initial communities, it is be highly recommended to 
-#' use initial community as a study area raster layer.
+#' this function is to generate the species ecoregion table for landis input.
+#' the maximum biomass for pure stand 
 #' 
 #' @param speciesLayers  RasterStack. It contains all the species raster layers of kNN.
 #' 

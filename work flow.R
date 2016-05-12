@@ -6,10 +6,10 @@ canadamap <- shapefile("~/GIS DataBase/Canada/Canada.shp")
 dev(4)
 clearPlot()
 Plot(canadamap)
-severalrandompoints <- clickCoordinates(5)
+severalrandompoints <- clickCoordinates(10)
 studyarea <- SpatialPolygons(list(Polygons(list(Polygon(severalrandompoints$coords)), ID = 1)),
                              proj4string = crs(canadamap))
-rm(canadamap)
+
 # prepare ecoregion map and initial community map in study area
 ecoregionfull <- shapefile("M:/data/ecoFramework/Ecodistricts/ecodistricts.shp")
 ecoregionstatus <- data.table(active = "yes",
@@ -19,7 +19,7 @@ speciesnames <- names(specieslayersfull)
 
 source('~/GitHub/landwebNRV/landwebNRV/R/initialCommunityMapProducer_kNN.R')
 initialCommFiles <- initialCommunityMapProducer_kNN(speciesLayers = specieslayersfull, 
-                                                    speciesNames = speciesnames,
+                                                    speciesPresence = 50,
                                                     studyArea = studyarea)
 
 source('~/GitHub/landwebNRV/landwebNRV/R/ecoregionMapProducer.R')
@@ -40,15 +40,23 @@ simulationMaps <- nonactiveEcoFromRaster(nonactiveRaster = lcc2005,
                                          ecoregion = ecoregionFiles$ecoregion,
                                          initialCommunityMap = initialCommFiles$initialCommunityMap,
                                          initialCommunity = initialCommFiles$initialCommunity)
+biomassmap <- raster("M:/data/kNN/Original/NFI_MODIS250m_kNN_Structure_Biomass_TotalLiveAboveGround_v0.tif")
+source('~/GitHub/landwebNRV/landwebNRV/R/biomassAttr_IntepFromkNN.R')
+speciesEcoregionTable <- biomassAttr_IntepFromkNN(speciesLayers = specieslayersfull,
+                                                  biomassLayer = biomassmap,
+                                                  percentageCutPoint = 50,
+                                                  intepolateMethod = "IDW",
+                                                  ecoregionMap = simulationMaps$ecoregionMap)
+
 
 # get the biomass attributs from kNN maps 
 biomassmap <- raster("M:/data/kNN/Original/NFI_MODIS250m_kNN_Structure_Biomass_TotalLiveAboveGround_v0.tif")
 samap <- raster("M:/data/kNN/Original/NFI_MODIS250m_kNN_Structure_Stand_Age_v0.tif")
 source('~/GitHub/landwebNRV/landwebNRV/R/biomassAttributes_kNN.R')
 speciesEcoregionTable <- biomassAttributes_kNN(speciesLayers = specieslayersfull,
-                                        biomassLayer = biomassmap,
-                                        SALayer = samap,
-                                        ecoregionMap = simulationMaps$ecoregionMap)
+                                               biomassLayer = biomassmap,
+                                               SALayer = samap,
+                                               ecoregionMap = simulationMaps$ecoregionMap)
 
 
 # get the biomass attributs from ground plots
