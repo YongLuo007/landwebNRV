@@ -47,45 +47,40 @@ setMethod(
                         biomassLayer,
                         SALayer,
                         ecoregionMap) {
-    projection(speciesLayers) <- projection(ecoregionMap)
+    if(projection(speciesLayers)!=projection(ecoregionMap)){
+      ecoregionMap <- projectRaster(ecoregionMap, crs = crs(speciesLayers))
+      ecoregionMap[] <- round(getValues(ecoregionMap))
+    }
+    if(projection(speciesLayers)!=projection(biomassLayer)){
+      biomassLayer <- projectRaster(biomassLayer, crs = crs(speciesLayers))
+    }
+    if(projection(speciesLayers)!=projection(SALayer)){
+      SALayer <- projectRaster(SALayer, crs = crs(speciesLayers))
+    }
+    
     speciesinstudyarea <- crop(speciesLayers, ecoregionMap)
     speciesinstudyarea <- suppressWarnings(mask(speciesinstudyarea, ecoregionMap))
     speciesTable <- data.table(getValues(speciesinstudyarea))
     
-    projection(biomassLayer) <- projection(ecoregionMap)
     biomassinstudyarea <- crop(biomassLayer, ecoregionMap)
     biomassinstudyarea <- suppressWarnings(mask(biomassinstudyarea, ecoregionMap))
-    speciesTable[,biomass:=getValues(biomassinstudyarea)]
+    speciesTable[, biomass:=getValues(biomassinstudyarea)]
     
-    projection(SALayer) <- projection(ecoregionMap)
+
+    
     SAinstudyarea <- crop(SALayer, ecoregionMap)
     SAinstudyarea <- suppressWarnings(mask(SAinstudyarea, ecoregionMap))
-    speciesTable[,SA:=getValues(SAinstudyarea)]
     
-    speciesTable[,ecoregion:=getValues(ecoregionMap)]
+    speciesTable[,':='(SA = getValues(SAinstudyarea), ecoregion = getValues(ecoregionMap))]
     speciesTable <- speciesTable[!is.na(ecoregion),]
-    output <- data.table(ecoregion = numeric(),
-                         species = character(),
-                         maxBiomass = numeric(),
-                         maxANPP = numeric())
-    for(species in names(speciesLayers)){
-      speciestable_sub <- speciesTable[,c(species, "biomass", "SA", "ecoregion"), with = FALSE]
-      setnames(speciestable_sub, species, "precentage")
-      speciestable_sub[,species:=species]
-      speciestable_sub <- speciestable_sub[precentage>50,]# species dominant stands
-      outputAdd <- data.table(ecoregion = sort(unique(speciesTable$ecoregion)),
-                                               species = species)
-      if(nrow(speciestable_sub)>0){
-        speciestable_sub <- speciestable_sub[,.(maxBiomass=100*quantile(biomass, 0.8, na.rm = TRUE)),
-                                             by = c("ecoregion", "species")]
-        speciestable_sub[,maxANPP:=maxBiomass/30]# using this equation for now, 
-                                                  # will improve later
-        outputAdd <- left_join(outputAdd, speciestable_sub, by = c("ecoregion", "species")) %>%
-          data.table
-      } else {
-        outputAdd[,':='(maxBiomass = NA, maxANPP = NA)]
-      }
-      output <- rbind(output, outputAdd)
-    }
+    speciesTable <- melt.data.table(speciesTable, measure.vars = names(speciesinstudyarea),
+                                     variable.name = "species", value.name = "percentage")
+    speciesTable[, speciesBiomass:=biomass*percentage*0.01]
+    speciesTable1 <- speciesTable[percentage>=50,]
+    speciesTable1 <- speciesTable1[,.(maxBiomass = 100*quantile(speciesBiomass, 0.8, na.rm = TRUE)),
+                                   by = c("ecoregion", "species")]
+    output <- unique(speciesTable[,.(ecoregion, species)], by = c("ecoregion", "species"))
+    output <- dplyr::left_join(output, speciesTable1, by = c("ecoregion", "species")) %>%
+      data.table
     return(speciesBiomass = output)
   })
