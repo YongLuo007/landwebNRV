@@ -12,7 +12,7 @@
 #' @param summaryPeriod,  Numeric. Providing period of the summary.
 #'                        If missing, all the maps will be summarized.
 #' 
-#' @param minPatchSize, Numeric. Providing the minimum patch size should be summarized.
+#' @param patchClass, Numeric. Providing the minimum patch size should be summarized.
 #'                      Default is 5000 ha.
 #' 
 #' @return one data table objects. It has the PlotID for each ecoregion in the study area.
@@ -39,7 +39,7 @@
 setGeneric("postSimuSummary_Patch", function(focalArea,
                                              summaryMaps,
                                              summaryPeriod,
-                                             minPatchSize) {
+                                             patchClass) {
   standardGeneric("postSimuSummary_Patch")
 })
 setMethod(
@@ -47,28 +47,26 @@ setMethod(
   signature = c(focalArea = "SpatialPolygons",
                 summaryMaps = "RasterStack",
                 summaryPeriod = "numeric",
-                minPatchSize = "numeric"),
+                patchClass = "numeric"),
   definition = function(focalArea,
                         summaryMaps,
                         summaryPeriod,
-                        minPatchSize) {
-    ecoDisFull <- shapefile("M:/data/ecoFramework/Ecodistricts/ecodistricts.shp")
-    summaryMaps <- readRDS("M:/data/LandWeb/BorealPlain simulation/outputs/seralStageMapStackRep1.rds")
-    ecoDisFull <- spTransform(ecoDisFull,crs(summaryMaps))
-    ecoDis <- crop(ecoDisFull, summaryMaps)
-    
-    summarizedRegion <- sort(unique(ecoDis$ECOREGION)) # could be FMA or area owned by companies.
-    focalArea <- ecoDis[ecoDis$ECOREGION == summarizedRegion[2],]
-    summaryPeriod <- c(1400, 1500)
+                        patchClass) {
     focalArea <- spTransform(focalArea, crs(summaryMaps))
-    summaryMaps_sub <- crop(summaryMaps, focalArea)
-    summaryMaps_sub <- suppressWarnings(mask(summaryMaps_sub, focalArea))
     subsetNames <- names(summaryMaps)[names(summaryMaps) <= paste("Year", max(summaryPeriod), sep = "") 
                                       & names(summaryMaps) >= paste("Year", min(summaryPeriod), sep = "")]
-    summaryMaps_sub <- subset(summaryMaps_sub, subsetNames)
+    summaryMaps_sub <- subset(summaryMaps, subsetNames)
+    summaryMaps_sub <- crop(summaryMaps_sub, focalArea)
+    summaryMaps_sub <- suppressWarnings(mask(summaryMaps_sub, focalArea))
     years <- as.numeric(sapply(strsplit(names(summaryMaps_sub), "Year", fixed = TRUE), function(x)(x[2])))
     # for each layer
-    output <- data.table(year = numeric(),
+    if(min(patchClass) != 0){
+      patchClass <- c(0, patchClass)
+    }
+    patchClass <- c(patchClass, ncell(summaryMaps_sub)*(res(summaryMaps_sub)[1]^2)/10000)
+    clumpMaps <- stack()
+    output <- data.table(patchClasses = character(),
+                         year = numeric(),
                          landType = numeric(),
                          NofPatch = numeric())
     for (indiYear in years){
@@ -77,24 +75,22 @@ setMethod(
       # for each type
       for(type in types){
         yearLayer <- yearLayer1
-        yearLayer[Which(!is.na(yearLayer) & yearLayer != type, cells = TRUE)] <- 0
+        yearLayer[Which(!is.na(yearLayer) & yearLayer != type, cells = TRUE)] <- NA
         clumpedLayer <- clump(yearLayer)
-        
+        names(clumpedLayer) <- paste("Year", indiYear, "_Type", type, sep = "")
+        clumpMaps <- stack(clumpMaps, clumpedLayer)
         freqTable <- data.table(freq(clumpedLayer))[!is.na(value),]
         freqTable <- freqTable[,.(frequency = length(value)), by = count][
-          , area:=count*(res(clumpedLayer)[1]^2)/10000][area >= minPatchSize,]
-        outputAdd <- data.table(year = indiYear,
-                                landType = type,
-                                NofPatch = sum(freqTable$frequency))
+          , area:=count*(res(clumpedLayer)[1]^2)/10000]
+        freqTable[, patchClasses := as.character(cut(freqTable$area, patchClass, right = FALSE))]
+        outputAdd <- freqTable[,.(year = indiYear,
+                                  landType = type,
+                                  NofPatch = sum(frequency)),
+                               by = patchClasses]
         output <- rbind(output, outputAdd)
       }
-      
     }
-    
-    
-    
-    
-    return(output)
+    return(list(freqTable = output, clumppedMaps = clumpMaps))
   })
 
 
@@ -105,16 +101,47 @@ setMethod(
   "postSimuSummary_Patch",
   signature = c(focalArea = "SpatialPolygons",
                 summaryMaps = "RasterStack",
-                summaryPeriod = "missing"),
-  definition = function(focalArea, summaryMaps) {
+                summaryPeriod = "missing",
+                patchClass = "numeric"),
+  definition = function(focalArea, summaryMaps, patchClass) {
     postSimuSummary_Patch(focalArea = focalArea, 
                           summaryMaps = summaryMaps,
                           summaryPeriod = range(as.numeric(sapply(strsplit(names(summaryMaps), "Year", fixed = TRUE),
-                                                                  function(x)(x[2])))))
+                                                                  function(x)(x[2])))),
+                          patchClass = patchClass)
+  })    
+
+#' @export
+#' @rdname postSimuSummary_Patch
+setMethod(
+  "postSimuSummary_Patch",
+  signature = c(focalArea = "SpatialPolygons",
+                summaryMaps = "RasterStack",
+                summaryPeriod = "numeric",
+                patchClass = "missing"),
+  definition = function(focalArea, summaryMaps, summaryPeriod) {
+    postSimuSummary_Patch(focalArea = focalArea, 
+                          summaryMaps = summaryMaps,
+                          summaryPeriod = summaryPeriod,
+                          patchClass = 5000)
   })    
 
 
 
-
+#' @export
+#' @rdname postSimuSummary_Patch
+setMethod(
+  "postSimuSummary_Patch",
+  signature = c(focalArea = "SpatialPolygons",
+                summaryMaps = "RasterStack",
+                summaryPeriod = "missing",
+                patchClass = "missing"),
+  definition = function(focalArea, summaryMaps) {
+    postSimuSummary_Patch(focalArea = focalArea, 
+                          summaryMaps = summaryMaps,
+                          summaryPeriod = range(as.numeric(sapply(strsplit(names(summaryMaps), "Year", fixed = TRUE),
+                                                                  function(x)(x[2])))),
+                          patchClass = 5000)
+  }) 
 
 

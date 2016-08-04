@@ -79,6 +79,7 @@ setMethod(
     speciesTable1 <- speciesTable[percentage>=50,]
     speciesTable1 <- speciesTable1[,.(maxBiomass = 100*quantile(speciesBiomass, 0.8, na.rm = TRUE)),
                                    by = c("ecoregion", "species")]
+    speciesTable1[, maxANPP:=maxBiomass/30]
     output <- unique(speciesTable[,.(ecoregion, species)], by = c("ecoregion", "species"))
     output <- dplyr::left_join(output, speciesTable1, by = c("ecoregion", "species")) %>%
       data.table
