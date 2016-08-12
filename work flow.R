@@ -6,6 +6,10 @@ canadamap <- shapefile("~/GIS DataBase/Canada/Canada.shp")
 dev(4)
 clearPlot()
 Plot(canadamap)
+dataPath <- "~/GitHub/LandWeb/landWebParent/data"
+ecoZone <- raster::shapefile(file.path(dataPath, "ecozones.shp"))
+
+
 severalrandompoints <- clickCoordinates(10)
 studyarea <- SpatialPolygons(list(Polygons(list(Polygon(severalrandompoints$coords)), ID = 1)),
                              proj4string = crs(canadamap))

@@ -37,7 +37,6 @@ setMethod(
                 ecoregionMap = "RasterLayer"),
   definition = function(speciesLayers,
                         ecoregionMap) {
-    ecoregionMap <- simulationMaps$ecoregionMap
     if(as.character(crs(speciesLayers)) != as.character(crs(ecoregionMap))){
       ecoregionMap <- projectRaster(ecoregionMap, crs = projection(speciesLayers))
     } 

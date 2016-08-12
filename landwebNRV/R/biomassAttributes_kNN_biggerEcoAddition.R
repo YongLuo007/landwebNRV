@@ -58,8 +58,6 @@ setMethod(
                         ecoregionMap,
                         biggerEcoMap,
                         NAData) {
-    browser()
-    
     if(projection(speciesLayers)!=projection(ecoregionMap)){
       ecoregionMap <- projectRaster(ecoregionMap, crs = crs(speciesLayers))
       ecoregionMap[] <- round(getValues(ecoregionMap))
@@ -76,14 +74,13 @@ setMethod(
     subEcoregion <- ecoregionMap
     subEcoregion[!(getValues(subEcoregion) %in% unique(NAData$ecoregion))] <- NA
     subbiggerEcoMap <- raster::crop(biggerEcoMap, subEcoregion)
-    browser()
     subbiggerEcoLevel <- unique(subbiggerEcoMap@data$ECOREGION)
     subbigEcoMap <- biggerEcoMap[biggerEcoMap@data$ECOREGION %in% subbiggerEcoLevel,]
-    subbiggerEcoMap_Raster <- crop(biomassmap, subbigEcoMap)
+    subbiggerEcoMap_Raster <- crop(biomassLayer, subbigEcoMap)
     
-    subbiggerEcoMap_Raster <- setValues(ecoregionMap, NA)
+    subbiggerEcoMap_Raster <- setValues(subbiggerEcoMap_Raster, NA)
     for(indiEcoregion in subbiggerEcoLevel){
-      indiSubBiggerEcoMap <- biggerEcoMap[biggerEcoMap@data$ECOREGION == indiEcoregion,]
+      indiSubBiggerEcoMap <- subbigEcoMap[subbigEcoMap@data$ECOREGION == indiEcoregion,]
       indiEcoMapRaster <- setValues(subbiggerEcoMap_Raster, indiEcoregion) 
       indiEcoMapRaster <- crop(indiEcoMapRaster, indiSubBiggerEcoMap)
       indiEcoMapRaster <- suppressWarnings(mask(indiEcoMapRaster, indiSubBiggerEcoMap))
@@ -93,9 +90,10 @@ setMethod(
         biggerEcoMapRaster <- merge(biggerEcoMapRaster, indiEcoMapRaster)
       }
     }
-    biggerEcoMapRaster <- suppressWarnings(mask(biggerEcoMapRaster, subEcoregion))
+    biggerEcoMapRaster_ST <- crop(biggerEcoMapRaster, subEcoregion)
+    biggerEcoMapRaster_ST <- suppressWarnings(mask(biggerEcoMapRaster_ST, subEcoregion))
     ecodistrictEcoregionTable <- data.table(ecoregion = getValues(subEcoregion),
-                                            biggerEcoregion = getValues(biggerEcoMapRaster))[!is.na(ecoregion),]
+                                            biggerEcoregion = getValues(biggerEcoMapRaster_ST))[!is.na(ecoregion),]
     #check whether one district has more than one ecoregion, which is not correct
     ecodistrictEcoregionTable[,totLength:=length(biggerEcoregion), by = ecoregion]
     ecodistrictEcoregionTable[,ecoLength:=length(totLength), by = c("biggerEcoregion", "ecoregion")]
@@ -103,13 +101,14 @@ setMethod(
     ecodistrictEcoregionTable[, maxPercent:=max(percentage), by = ecoregion]
     ecodistrictEcoregionTable <- ecodistrictEcoregionTable[percentage == maxPercent, .(biggerEcoregion, ecoregion)] %>%
       unique(., by = c("biggerEcoregion", "ecoregion"))
-
-    ecoregionBiomass <- biomassAttributes_kNN(speciesLayers = specieslayersfull,
-                          biomassLayer = biomassmap,
-                          SALayer = samap,
+    source('~/GitHub/landwebNRV/landwebNRV/R/biomassAttributes_kNN.R')
+    ecoregionBiomass <- biomassAttributes_kNN(speciesLayers = speciesLayers,
+                          biomassLayer = biomassLayer,
+                          SALayer = SALayer,
                           ecoregionMap = biggerEcoMapRaster)
     setnames(ecoregionBiomass, "ecoregion", "biggerEcoregion")
     NAData <- setkey(NAData, ecoregion)[setkey(ecodistrictEcoregionTable, ecoregion), nomatch = 0]
+    NAData[,species:=as.character(species)]
     NAData <- dplyr::left_join(NAData[,.(biggerEcoregion, ecoregion, species, SEP)], ecoregionBiomass,
                                by = c("biggerEcoregion", "species")) %>%
       data.table

@@ -60,28 +60,31 @@ setMethod(
     
     speciesinstudyarea <- crop(speciesLayers, ecoregionMap)
     speciesinstudyarea <- suppressWarnings(mask(speciesinstudyarea, ecoregionMap))
-    speciesTable <- data.table(getValues(speciesinstudyarea))
-    
     biomassinstudyarea <- crop(biomassLayer, ecoregionMap)
     biomassinstudyarea <- suppressWarnings(mask(biomassinstudyarea, ecoregionMap))
-    speciesTable[, biomass:=getValues(biomassinstudyarea)]
-    
-
-    
+    speciesTable <- data.table(biomass=getValues(biomassinstudyarea))
     SAinstudyarea <- crop(SALayer, ecoregionMap)
     SAinstudyarea <- suppressWarnings(mask(SAinstudyarea, ecoregionMap))
     
     speciesTable[,':='(SA = getValues(SAinstudyarea), ecoregion = getValues(ecoregionMap))]
-    speciesTable <- speciesTable[!is.na(ecoregion),]
-    speciesTable <- melt.data.table(speciesTable, measure.vars = names(speciesinstudyarea),
-                                     variable.name = "species", value.name = "percentage")
-    speciesTable[, speciesBiomass:=biomass*percentage*0.01]
-    speciesTable1 <- speciesTable[percentage>=50,]
-    speciesTable1 <- speciesTable1[,.(maxBiomass = 100*quantile(speciesBiomass, 0.8, na.rm = TRUE)),
-                                   by = c("ecoregion", "species")]
-    speciesTable1[, maxANPP:=maxBiomass/30]
-    output <- unique(speciesTable[,.(ecoregion, species)], by = c("ecoregion", "species"))
-    output <- dplyr::left_join(output, speciesTable1, by = c("ecoregion", "species")) %>%
+    outputPartial <- data.table(ecoregion = numeric(), species = character(),
+                         maxBiomass = numeric(), maxANPP = numeric())
+    speciess <- names(speciesLayers)
+    for(species in speciess){
+      indispeciesraster <- subset(speciesinstudyarea, species)
+      speciesTable[, percentage:=getValues(indispeciesraster)]
+      speciesTable_narmed <- speciesTable[!is.na(ecoregion),]
+      speciesTable_narmed[, speciesBiomass:=biomass*percentage*0.01]
+      speciesTable_narmed <- speciesTable_narmed[percentage>=50,]
+      speciesTable_narmed[,species:=species]
+      speciesTable_narmed <- speciesTable_narmed[,.(maxBiomass = 100*quantile(speciesBiomass, 0.8, na.rm = TRUE)),
+                                     by = c("ecoregion", "species")]
+      speciesTable_narmed[, maxANPP:=maxBiomass/30]
+      outputPartial <- rbind(outputPartial, speciesTable_narmed)
+    }
+    output <- data.table(expand.grid(ecoregion = as.numeric(unique(getValues(ecoregionMap))),
+                                     species = speciess))[!is.na(ecoregion),][,species:=as.character(species)]
+    output <- dplyr::left_join(output, outputPartial, by = c("ecoregion", "species")) %>%
       data.table
     return(speciesBiomass = output)
   })
