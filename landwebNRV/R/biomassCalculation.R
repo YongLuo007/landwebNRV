@@ -24,7 +24,7 @@
 #'
 #' @seealso no
 #'
-#' @include simList-class.R
+#' @include 
 #' @export
 #' @docType methods
 #' @rdname biomassCalculation
