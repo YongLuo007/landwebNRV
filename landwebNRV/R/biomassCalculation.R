@@ -13,7 +13,7 @@
 #' @param height  Numeric. The tree's height (m).
 #' 
 #' @param equationSource  Character. Determine the sources of equations. 
-#'        Currently, this functions has two
+#'        Currently, this function has two
 #'        options, i.e., "Lambert2005" and "Ung2008".
 #'        Default \code{Lambert2005}
 #'
