@@ -1,5 +1,6 @@
 ################################################################################
-#' purify BC PSP data 
+#' organize the BC PSP data based on sampling protocols, 
+#' and select the data that can be used in LandWeb project
 #' 
 #' 
 #' @param treeDataRaw  data table, 
@@ -8,8 +9,10 @@
 #' @param plotHeaderDataRaw data.table, 
 #'        
 #'
-#' @return  two data tables, the first one head data, which contains the location and SA info.
-#'                           the second one is purified tree data, which contains inividual tree infor.
+#' @return  two data tables, the first one header data, 
+#'                           which contains the location and SA info.
+#'                           the second one is organized tree data, 
+#'                           which contains inividual tree information.
 #'                           for the tree data, all trees are alive.
 #'  
 #' @importFrom data.table setkey setnames ':=' set
