@@ -5,9 +5,9 @@ Version: 1.0
 Date: 2016-04-13
 Authors@R: c(
     person("Yong", "Luo", email="yong.luo@canada.ca",
-    role=c("aut"))
+    role=c("aut", "cre"))
     )
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Maintainer: Yong Luo <yong.luo@canada.ca>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Depends:
@@ -49,3 +49,31 @@ Imports:
     sp,
     stringi,
     stringr
+Collate:
+    'UTMtoLongLat.R'
+    'biomassAttr_IntepFromkNN.R'
+    'biomassAttributes_Groundplots.R'
+    'biomassAttributes_kNN.R'
+    'biomassAttributes_kNN_biggerEcoAddition.R'
+    'biomassCalculation.R'
+    'dataPurification_ABMature.R'
+    'dataPurification_BCPSP.R'
+    'dataPurification_MBPSP.R'
+    'dataPurification_MBTSP.R'
+    'dataPurification_NFIPSP.R'
+    'dataPurification_NWTTSP.R'
+    'dataPurification_SKPSP.R'
+    'dataPurification_SKTSP_Mistic.R'
+    'dataPurification_SKTSP_PPPA.R'
+    'ecoregionClassification.R'
+    'ecoregionMapProducer.R'
+    'initialCommunityMapProducer_kNN.R'
+    'landwebNRV.R'
+    'nonactiveEcoFromPolys.R'
+    'nonactiveEcoFromRaster.R'
+    'obtainTreeDataAB.R'
+    'postSimuSummary.R'
+    'postSimuSummary_Patch.R'
+    'speciesDominanceIdentification.R'
+    'speciesRelativeAbundance_kNN.R'
+    'standardizeSpeciesName.R'

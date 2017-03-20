@@ -25,7 +25,7 @@
 #'
 #' @seealso no
 #'
-#' @include simList-class.R
+#' @include 
 #' @export
 #' @docType methods
 #' @rdname biomassCalculation
@@ -734,8 +734,30 @@ setMethod(
                           foliage1*DBH^foliage2+
                           branches1*DBH^branches2]
         } else {
-          tempdatatable[species == individualSpecies,
-                        biomass := 0]
+          if(paperSource == "Lambert2005"){
+            wood1 <- 0.0787
+            wood2 <- 2.3702
+            bark1 <- 0.0185
+            bark2 <- 2.2159
+            branches1 <- 0.0230
+            branches2 <- 2.2678
+            foliage1 <- 0.0767
+            foliage2 <- 1.5720
+          } else {
+            wood1 <- 0.0741
+            wood2 <- 2.3875
+            bark1 <- 0.0182
+            bark2 <- 2.2181
+            branches1 <- 0.0227
+            branches2 <- 2.2797
+            foliage1 <- 0.0764
+            foliage2 <- 1.5861
+          }
+          tempdatatable[is.na(biomass),
+                        biomass := wood1*DBH^wood2+
+                          bark1*DBH^bark2+
+                          foliage1*DBH^foliage2+
+                          branches1*DBH^branches2]
         }
       }
       
@@ -1625,14 +1647,42 @@ setMethod(
                           foliage1*(DBH^foliage2)*(height^foliage3)+
                           branches1*(DBH^branches2)*(height^branches3)]
         } else {
-          tempdatatable[species == individualSpecies,
-                        biomass := 0]
+          if(paperSource == "Lambert2005"){
+            wood1 <- 0.0348
+            wood2 <- 1.9235
+            wood3 <- 0.7829
+            bark1 <- 0.0139
+            bark2 <- 1.5429
+            bark3 <- 0.8189
+            branches1 <- 0.0346
+            branches2 <- 2.6706
+            branches3 <- -0.6033
+            foliage1 <- 0.1822
+            foliage2 <- 2.2864
+            foliage3 <- -1.1203
+          } else {
+            wood1 <- 0.0283
+            wood2 <- 1.8298
+            wood3 <- 0.9546
+            bark1 <- 0.0120
+            bark2 <- 1.6378
+            bark3 <- 0.7746
+            branches1 <- 0.0338
+            branches2 <- 2.6624
+            branches3 <- -0.5743
+            foliage1 <- 0.1699
+            foliage2 <- 2.3289
+            foliage3 <- -1.1316
+          }
+          tempdatatable[is.na(biomass),
+                        biomass := wood1*(DBH^wood2)*(height^wood3)+
+                          bark1*(DBH^bark2)*(height^bark3)+
+                          foliage1*(DBH^foliage2)*(height^foliage3)+
+                          branches1*(DBH^branches2)*(height^branches3)]
         }
       }
     }
-    
-    return(list(biomass = tempdatatable$biomass,
-                missedSpecies = unique(tempdatatable[biomass == 0,]$species)))
+    return(biomass = tempdatatable$biomass)
   })
 
 #' @export
